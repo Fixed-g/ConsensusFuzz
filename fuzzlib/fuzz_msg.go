@@ -1,11 +1,11 @@
 package fuzzlib
 
 import (
-	"chainmaker.org/chainmaker/consensus-tbft/v2"
 	"chainmaker.org/chainmaker/pb-go/v2/common"
 	consensuspb "chainmaker.org/chainmaker/pb-go/v2/consensus"
 	tbftpb "chainmaker.org/chainmaker/pb-go/v2/consensus/tbft"
 	netpb "chainmaker.org/chainmaker/pb-go/v2/net"
+	tbft "github.com/Fixed-g/ConsensusFuzz/v0.1"
 )
 
 const (

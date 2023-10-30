@@ -1,4 +1,4 @@
-module chainmaker.org/chainmaker/consensus-tbft/v2
+module github.com/Fixed-g/ConsensusFuzz/v0.1
 
 go 1.15
 

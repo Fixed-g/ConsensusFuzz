@@ -1,11 +1,11 @@
 package fuzzlib
 
 import (
-	"chainmaker.org/chainmaker/consensus-tbft/v2"
 	"chainmaker.org/chainmaker/pb-go/v2/common"
 	tbftpb "chainmaker.org/chainmaker/pb-go/v2/consensus/tbft"
 	"encoding/json"
 	"fmt"
+	tbft "github.com/Fixed-g/ConsensusFuzz/v0.1"
 	"github.com/mitchellh/mapstructure"
 	"io/ioutil"
 	"os"
