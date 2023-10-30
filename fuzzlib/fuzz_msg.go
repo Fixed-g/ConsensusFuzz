@@ -5,7 +5,7 @@ import (
 	consensuspb "chainmaker.org/chainmaker/pb-go/v2/consensus"
 	tbftpb "chainmaker.org/chainmaker/pb-go/v2/consensus/tbft"
 	netpb "chainmaker.org/chainmaker/pb-go/v2/net"
-	tbft "github.com/Fixed-g/ConsensusFuzz/v0.1"
+	tbft "github.com/fixed-g/consensusfuzz/v0.1"
 )
 
 const (
