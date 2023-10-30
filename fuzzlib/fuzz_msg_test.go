@@ -5,7 +5,7 @@ import (
 	tbftpb "chainmaker.org/chainmaker/pb-go/v2/consensus/tbft"
 	"encoding/json"
 	"fmt"
-	tbft "github.com/fixed-g/consensusfuzz/v0.1"
+	tbft "github.com/fixed-g/consensusfuzz/v2"
 	"github.com/mitchellh/mapstructure"
 	"io/ioutil"
 	"os"
