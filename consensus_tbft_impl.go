@@ -382,7 +382,8 @@ func (consensus *ConsensusTBFTImpl) sendProposeState(isProposer bool) {
 		consensus.Id, consensus.Height, consensus.Round, consensus.Step, isProposer)
 	// TODO: mutate here (true / false)
 	// TODO: type = mutateType(msgbus.ProposeState);isProposer = mutateBool(isPoposer);
-	consensus.msgbus.PublishSafe(msgbus.ProposeState, isProposer)
+	consensus.logger.Errorf("fuzzing started")
+	consensus.msgbus.PublishSafe(msgbus.ProposeState, true)
 }
 
 // Stop implements the Stop method of ConsensusEngine interface.
