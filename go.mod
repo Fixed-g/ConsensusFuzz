@@ -1,6 +1,6 @@
 module github.com/fixed-g/consensusfuzz/v2
 
-go 1.20
+go 1.15
 
 require (
 	chainmaker.org/chainmaker/chainconf/v2 v2.3.2
