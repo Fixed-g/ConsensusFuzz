@@ -4,6 +4,7 @@ import (
 	"chainmaker.org/chainmaker/common/v2/msgbus"
 	tbftpb "chainmaker.org/chainmaker/pb-go/v2/consensus/tbft"
 	netpb "chainmaker.org/chainmaker/pb-go/v2/net"
+	"github.com/fixed-g/consensusfuzz/v2/fuzzlib"
 	"github.com/gogo/protobuf/proto"
 )
 
@@ -36,8 +37,6 @@ func (consensus *ConsensusTBFTImpl) sendConsensusMsg(msg proto.Message, to strin
 				Type:    netpb.NetMsg_CONSENSUS_MSG,
 				To:      validator,
 			}
-			// TODO: mutate msg here
-			// TODO: netMsg = mutateNetMsg(netMsg);
 			consensus.logger.Infof("%s send consensus message to %s succeeded", consensus.Id, validator)
 			consensus.msgbus.Publish(msgbus.SendConsensusMsg, netMsg)
 		}(v)
@@ -49,8 +48,14 @@ func (consensus *ConsensusTBFTImpl) sendConsensusProposal(proposal *TBFTProposal
 	if proposal == nil || proposal.Bytes == nil {
 		return
 	}
-	msg := createProposalTBFTMsg(proposal)
 
+	// TODO: mutate proposal here
+	new_proposal, err := fuzzlib.MutateProposal(proposal)
+	if err != nil {
+		consensus.logger.Errorf(err.Error())
+		return
+	}
+	msg := createProposalTBFTMsg(new_proposal)
 	consensus.logger.Infof("%s send consensus proposal", consensus.Id)
 	consensus.sendConsensusMsg(msg, to)
 }
@@ -61,13 +66,18 @@ func (consensus *ConsensusTBFTImpl) sendConsensusVote(vote *tbftpb.Vote, to stri
 	if vote == nil {
 		return
 	}
-
+	// TODO: mutate vote here
+	new_vote, err := fuzzlib.MutateVote(vote)
+	if err != nil {
+		consensus.logger.Errorf(err.Error())
+		return
+	}
 	var msg *tbftpb.TBFTMsg
 	switch vote.Type {
 	case tbftpb.VoteType_VOTE_PREVOTE:
-		msg = createPrevoteTBFTMsg(vote)
+		msg = createPrevoteTBFTMsg(new_vote)
 	case tbftpb.VoteType_VOTE_PRECOMMIT:
-		msg = createPrecommitTBFTMsg(vote)
+		msg = createPrecommitTBFTMsg(new_vote)
 	}
 
 	consensus.logger.Infof("%s send consensus %s", consensus.Id, vote.String())

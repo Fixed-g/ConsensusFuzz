@@ -16,6 +16,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"github.com/fixed-g/consensusfuzz/v2/fuzzlib"
 	"reflect"
 	"strconv"
 	"sync"
@@ -382,7 +383,8 @@ func (consensus *ConsensusTBFTImpl) sendProposeState(isProposer bool) {
 		consensus.Id, consensus.Height, consensus.Round, consensus.Step, isProposer)
 	// TODO: mutate here (true / false)
 	// TODO: type = mutateType(msgbus.ProposeState);isProposer = mutateBool(isPoposer);
-	consensus.logger.Errorf("fuzzing started")
+	consensus.logger.Infof("fuzzing started")
+	isProposer = fuzzlib.MutateBool(isProposer)
 	consensus.msgbus.PublishSafe(msgbus.ProposeState, isProposer)
 }
 
@@ -998,7 +1000,7 @@ func (consensus *ConsensusTBFTImpl) procPropose(proposal *tbftpb.Proposal) {
 	// if verify succeed, we can enter Prevote
 	if proposal.Qc != nil && proposal.TxsRwSet != nil {
 		if err := consensus.procVerifyBlockWithRwSets(proposal); err != nil {
-			consensus.logger.Warnf("[%s](%d/%d/%s) procVerifyBlockWithRwSetsl error: %v",
+			consensus.logger.Warnf("[%s](%d/%d/%s) procVerifyBlockWithRwSetsl err: %v",
 				consensus.Id, consensus.Height, consensus.Round, consensus.Step,
 				err,
 			)
@@ -1014,7 +1016,12 @@ func (consensus *ConsensusTBFTImpl) procPropose(proposal *tbftpb.Proposal) {
 	consensus.VerifingProposal = NewTBFTProposal(proposal, false)
 	// Tell the consensus module to perform block validation
 	// TODO: type = mutateType(msgbus.VerifyBlock); block = mutateBlock(proposal.Block);
-	consensus.msgbus.PublishSafe(msgbus.VerifyBlock, proposal.Block)
+	block, err := fuzzlib.MutateBlock(proposal.Block)
+	if err != nil {
+		consensus.logger.Errorf(err.Error())
+		return
+	}
+	consensus.msgbus.PublishSafe(msgbus.VerifyBlock, block)
 
 	consensus.logger.Infof("[%s](%d/%d/%s) processed proposal (%d/%d/%x), time[verify:%dms]",
 		consensus.Id, consensus.Height, consensus.Round, consensus.Step,
@@ -1335,7 +1342,12 @@ func (consensus *ConsensusTBFTImpl) commitBlock(block *common.Block, voteSet *tb
 	block.AdditionalData.ExtraData[TBFTAddtionalDataKey] = qc
 	// TODO: need mutate
 	// TODO: type = mutateType(msgbus.commitBlock); block = mutateBlock(block);
-	consensus.msgbus.Publish(msgbus.CommitBlock, block)
+	new_block, err := fuzzlib.MutateBlock(block)
+	if err != nil {
+		consensus.logger.Errorf(err.Error())
+		return
+	}
+	consensus.msgbus.Publish(msgbus.CommitBlock, new_block)
 
 	consensus.logger.Infof("[%s](%d/%d/%s) consensus commit block (%d/%x), time[marshalQC:%dms]",
 		consensus.Id, consensus.Height, consensus.Round, consensus.Step,
@@ -1516,7 +1528,12 @@ func (consensus *ConsensusTBFTImpl) delInvalidTxs(vs *VoteSet, hash []byte) {
 				consensus.Id, consensus.Height, consensus.Round, consensus.Step)
 			// TODO: need mutate
 			// TODO: type = mutateType(msgbus.RwSetVerifyFailTxs); payload = mutatePayload(payload);
-			consensus.msgbus.PublishSafe(msgbus.RwSetVerifyFailTxs, payload)
+			new_payload, err := fuzzlib.MutateTxs(payload)
+			if err != nil {
+				consensus.logger.Errorf(err.Error())
+				return
+			}
+			consensus.msgbus.PublishSafe(msgbus.RwSetVerifyFailTxs, new_payload)
 		}
 	}
 }
@@ -1842,6 +1859,11 @@ func (consensus *ConsensusTBFTImpl) enterPrevote(height uint64, round int32) {
 	prevoteMsg := createPrevoteConsensusMsg(prevote)
 	// TODO: 发送给自己的内部消息
 	// TODO: prevoteMsg = mutateConsensusMsg(prevoteMsg);
+	prevoteMsg, err = fuzzlib.MutateVoteMsg(prevoteMsg)
+	if err != nil {
+		consensus.logger.Errorf(err.Error())
+		return
+	}
 	consensus.internalMsgC <- prevoteMsg
 
 	consensus.logger.Infof("[%s](%v/%v/%v) generated prevote (%d/%d/%x), time[sign:%dms]",
@@ -1922,6 +1944,11 @@ func (consensus *ConsensusTBFTImpl) enterPrecommit(height uint64, round int32) {
 	precommitMsg := createPrecommitConsensusMsg(precommit)
 	// TODO: 内部消息
 	// TODO: precommitMsg = mutateConsensusMsg(precommitMsg);
+	precommitMsg, err = fuzzlib.MutateVoteMsg(precommitMsg)
+	if err != nil {
+		consensus.logger.Errorf(err.Error())
+		return
+	}
 	consensus.internalMsgC <- precommitMsg
 
 	consensus.logger.Infof("[%s](%v/%v/%v) generated precommit (%d/%d/%x), time[sign:%dms]",

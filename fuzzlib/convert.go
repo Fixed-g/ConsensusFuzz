@@ -1,10 +1,12 @@
 package fuzzlib
 
 import (
+	"chainmaker.org/chainmaker/pb-go/v2/common"
 	consensuspb "chainmaker.org/chainmaker/pb-go/v2/consensus"
 	tbftpb "chainmaker.org/chainmaker/pb-go/v2/consensus/tbft"
 	"errors"
 	"fmt"
+	tbft "github.com/fixed-g/consensusfuzz/v2"
 	"github.com/golang/protobuf/proto"
 	"github.com/iancoleman/strcase"
 	"github.com/mitchellh/mapstructure"
@@ -270,25 +272,52 @@ func parseMetaTag(f reflect.StructField) bool {
 	return false
 }
 
-func MapToVoteMsg(m map[string]interface{}) *tbftpb.TBFTMsg {
+func MapToBlock(m map[string]interface{}) *common.Block {
+	block := &common.Block{}
+	err := mapstructure.Decode(m, block)
+	if err != nil {
+		return nil
+	}
+	return block
+}
+
+func MapToProposal(m map[string]interface{}) *tbft.TBFTProposal {
+	proposal := &tbft.TBFTProposal{}
+	err := mapstructure.Decode(m, proposal)
+	if err != nil {
+		return nil
+	}
+	return proposal
+}
+
+func MapToVote(m map[string]interface{}) *tbftpb.Vote {
+	vote := &tbftpb.Vote{}
+	err := mapstructure.Decode(m, vote)
+	if err != nil {
+		return nil
+	}
+	return vote
+}
+
+func MapToVoteMsg(m map[string]interface{}) *tbft.ConsensusMsg {
 	vote := &tbftpb.Vote{}
 	err := mapstructure.Decode(m["Msg"].(map[string]interface{}), vote)
 	if err != nil {
 		return nil
 	}
-	return &tbftpb.TBFTMsg{
+	return &tbft.ConsensusMsg{
 		Type: m["Type"].(tbftpb.TBFTMsgType),
 		Msg:  mustMarshal(vote),
 	}
 }
 
-func MapToProposalMsg(m map[string]interface{}) *tbftpb.TBFTMsg {
+func MapToProposalMsg(m map[string]interface{}) *tbft.ConsensusMsg {
 	proposal := &tbftpb.Proposal{}
 	err := mapstructure.Decode(m["Msg"].(map[string]interface{}), proposal)
 	if err != nil {
 		return nil
 	}
-	return &tbftpb.TBFTMsg{
+	return &tbft.ConsensusMsg{
 		Type: m["Type"].(tbftpb.TBFTMsgType),
 		Msg:  mustMarshal(proposal),
 	}
