@@ -4,7 +4,6 @@ import (
 	"chainmaker.org/chainmaker/common/v2/msgbus"
 	tbftpb "chainmaker.org/chainmaker/pb-go/v2/consensus/tbft"
 	netpb "chainmaker.org/chainmaker/pb-go/v2/net"
-	"github.com/fixed-g/consensusfuzz/v2/fuzzlib"
 	"github.com/gogo/protobuf/proto"
 )
 
@@ -50,7 +49,7 @@ func (consensus *ConsensusTBFTImpl) sendConsensusProposal(proposal *TBFTProposal
 	}
 
 	// TODO: mutate proposal here
-	new_proposal, err := fuzzlib.MutateProposal(proposal)
+	new_proposal, err := MutateProposal(proposal)
 	if err != nil {
 		consensus.logger.Errorf(err.Error())
 		return
@@ -67,7 +66,7 @@ func (consensus *ConsensusTBFTImpl) sendConsensusVote(vote *tbftpb.Vote, to stri
 		return
 	}
 	// TODO: mutate vote here
-	new_vote, err := fuzzlib.MutateVote(vote)
+	new_vote, err := MutateVote(vote)
 	if err != nil {
 		consensus.logger.Errorf(err.Error())
 		return

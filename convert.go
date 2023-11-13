@@ -1,15 +1,9 @@
-package fuzzlib
+package tbft
 
 import (
-	"chainmaker.org/chainmaker/pb-go/v2/common"
-	consensuspb "chainmaker.org/chainmaker/pb-go/v2/consensus"
-	tbftpb "chainmaker.org/chainmaker/pb-go/v2/consensus/tbft"
 	"errors"
 	"fmt"
-	tbft "github.com/fixed-g/consensusfuzz/v2"
-	"github.com/golang/protobuf/proto"
 	"github.com/iancoleman/strcase"
-	"github.com/mitchellh/mapstructure"
 	"reflect"
 	"strconv"
 )
@@ -270,82 +264,4 @@ func parseMetaTag(f reflect.StructField) bool {
 		return true
 	}
 	return false
-}
-
-func MapToBlock(m map[string]interface{}) *common.Block {
-	block := &common.Block{}
-	err := mapstructure.Decode(m, block)
-	if err != nil {
-		return nil
-	}
-	return block
-}
-
-func MapToProposal(m map[string]interface{}) *tbft.TBFTProposal {
-	proposal := &tbft.TBFTProposal{}
-	err := mapstructure.Decode(m, proposal)
-	if err != nil {
-		return nil
-	}
-	return proposal
-}
-
-func MapToVote(m map[string]interface{}) *tbftpb.Vote {
-	vote := &tbftpb.Vote{}
-	err := mapstructure.Decode(m, vote)
-	if err != nil {
-		return nil
-	}
-	return vote
-}
-
-func MapToVoteMsg(m map[string]interface{}) *tbft.ConsensusMsg {
-	vote := &tbftpb.Vote{}
-	err := mapstructure.Decode(m["Msg"].(map[string]interface{}), vote)
-	if err != nil {
-		return nil
-	}
-	return &tbft.ConsensusMsg{
-		Type: m["Type"].(tbftpb.TBFTMsgType),
-		Msg:  mustMarshal(vote),
-	}
-}
-
-func MapToProposalMsg(m map[string]interface{}) *tbft.ConsensusMsg {
-	proposal := &tbftpb.Proposal{}
-	err := mapstructure.Decode(m["Msg"].(map[string]interface{}), proposal)
-	if err != nil {
-		return nil
-	}
-	return &tbft.ConsensusMsg{
-		Type: m["Type"].(tbftpb.TBFTMsgType),
-		Msg:  mustMarshal(proposal),
-	}
-}
-
-func MapToTxs(m map[string]interface{}) *consensuspb.RwSetVerifyFailTxs {
-	txs := &consensuspb.RwSetVerifyFailTxs{}
-	err := mapstructure.Decode(m, txs)
-	if err != nil {
-		return nil
-	}
-	return txs
-}
-
-func mustMarshal(msg proto.Message) (data []byte) {
-	var err error
-	defer func() {
-		// while first marshal failed, retry marshal again
-		if recover() != nil {
-			data, err = proto.Marshal(msg)
-			if err != nil {
-				panic(err)
-			}
-		}
-	}()
-	data, err = proto.Marshal(msg)
-	if err != nil {
-		panic(err)
-	}
-	return
 }

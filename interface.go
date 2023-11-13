@@ -1,14 +1,75 @@
-package fuzzlib
+package tbft
 
 import (
 	"chainmaker.org/chainmaker/pb-go/v2/common"
 	"chainmaker.org/chainmaker/pb-go/v2/consensus"
+	consensuspb "chainmaker.org/chainmaker/pb-go/v2/consensus"
 	tbftpb "chainmaker.org/chainmaker/pb-go/v2/consensus/tbft"
-	tbft "github.com/fixed-g/consensusfuzz/v2"
+	"github.com/mitchellh/mapstructure"
 )
 
+func MapToBlock(m map[string]interface{}) *common.Block {
+	block := &common.Block{}
+	err := mapstructure.Decode(m, block)
+	if err != nil {
+		return nil
+	}
+	return block
+}
+
+func MapToProposal(m map[string]interface{}) *TBFTProposal {
+	proposal := &TBFTProposal{}
+	err := mapstructure.Decode(m, proposal)
+	if err != nil {
+		return nil
+	}
+	return proposal
+}
+
+func MapToVote(m map[string]interface{}) *tbftpb.Vote {
+	vote := &tbftpb.Vote{}
+	err := mapstructure.Decode(m, vote)
+	if err != nil {
+		return nil
+	}
+	return vote
+}
+
+func MapToVoteMsg(m map[string]interface{}) *ConsensusMsg {
+	vote := &tbftpb.Vote{}
+	err := mapstructure.Decode(m["Msg"].(map[string]interface{}), vote)
+	if err != nil {
+		return nil
+	}
+	return &ConsensusMsg{
+		Type: m["Type"].(tbftpb.TBFTMsgType),
+		Msg:  mustMarshal(vote),
+	}
+}
+
+func MapToProposalMsg(m map[string]interface{}) *ConsensusMsg {
+	proposal := &tbftpb.Proposal{}
+	err := mapstructure.Decode(m["Msg"].(map[string]interface{}), proposal)
+	if err != nil {
+		return nil
+	}
+	return &ConsensusMsg{
+		Type: m["Type"].(tbftpb.TBFTMsgType),
+		Msg:  mustMarshal(proposal),
+	}
+}
+
+func MapToTxs(m map[string]interface{}) *consensuspb.RwSetVerifyFailTxs {
+	txs := &consensuspb.RwSetVerifyFailTxs{}
+	err := mapstructure.Decode(m, txs)
+	if err != nil {
+		return nil
+	}
+	return txs
+}
+
 func MutateBool(b bool) bool {
-	return generate_random_bool()
+	return Generate_random_bool()
 }
 
 func MutateBlock(block *common.Block) (*common.Block, error) {
@@ -26,7 +87,7 @@ func MutateBlock(block *common.Block) (*common.Block, error) {
 	return block, nil
 }
 
-func MutateProposal(proposal *tbft.TBFTProposal) (*tbft.TBFTProposal, error) {
+func MutateProposal(proposal *TBFTProposal) (*TBFTProposal, error) {
 	var err error
 	var proposal_map map[string]interface{}
 	proposal_map, err = StructToMap(proposal)
@@ -71,7 +132,7 @@ func MutateTxs(txs *consensus.RwSetVerifyFailTxs) (*consensus.RwSetVerifyFailTxs
 	return txs, nil
 }
 
-func MutateVoteMsg(msg *tbft.ConsensusMsg) (*tbft.ConsensusMsg, error) {
+func MutateVoteMsg(msg *ConsensusMsg) (*ConsensusMsg, error) {
 	var err error
 	var msg_map map[string]interface{}
 	msg_map, err = StructToMap(msg)
@@ -86,7 +147,7 @@ func MutateVoteMsg(msg *tbft.ConsensusMsg) (*tbft.ConsensusMsg, error) {
 	return msg, nil
 }
 
-func MutateProposalMsg(msg *tbft.ConsensusMsg) (*tbft.ConsensusMsg, error) {
+func MutateProposalMsg(msg *ConsensusMsg) (*ConsensusMsg, error) {
 	var err error
 	var msg_map map[string]interface{}
 	msg_map, err = StructToMap(msg)

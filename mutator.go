@@ -1,4 +1,4 @@
-package fuzzlib
+package tbft
 
 import (
 	"errors"
@@ -15,7 +15,7 @@ const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 var seededRand *rand.Rand = rand.New(rand.NewSource(int64(time.Now().Nanosecond())))
 
-func generate_random_bool() bool {
+func Generate_random_bool() bool {
 	return seededRand.Intn(2) != 0
 }
 
@@ -53,7 +53,7 @@ func generate_edge_value_with_type(number interface{}) (interface{}, interface{}
 
 func edge_value_mutate_with_type(number interface{}) interface{} {
 	minNumber, maxNumber := generate_edge_value_with_type(number)
-	randChoice := generate_random_bool()
+	randChoice := Generate_random_bool()
 	switch randChoice {
 	case false:
 		return minNumber
@@ -273,7 +273,7 @@ func MutateMap(input map[string]interface{}) (map[string]interface{}, error) {
 		case reflect.Float64:
 			input[k] = generate_random_number_with_type(value)
 		case reflect.Bool:
-			input[k] = generate_random_bool()
+			input[k] = Generate_random_bool()
 		case reflect.String:
 			input[k] = random_mutate_string(value.(string))
 		case reflect.Slice:

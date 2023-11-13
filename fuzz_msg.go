@@ -1,11 +1,10 @@
-package fuzzlib
+package tbft
 
 import (
 	"chainmaker.org/chainmaker/pb-go/v2/common"
 	consensuspb "chainmaker.org/chainmaker/pb-go/v2/consensus"
 	tbftpb "chainmaker.org/chainmaker/pb-go/v2/consensus/tbft"
 	netpb "chainmaker.org/chainmaker/pb-go/v2/net"
-	tbft "github.com/fixed-g/consensusfuzz/v2"
 )
 
 const (
@@ -102,7 +101,7 @@ func RwSetVerifyFailTxsToValue(txs *consensuspb.RwSetVerifyFailTxs) *Value {
 	}
 }
 
-func ConsensusMsgToValue(consensusMsg *tbft.ConsensusMsg) *Value {
+func ConsensusMsgToValue(consensusMsg *ConsensusMsg) *Value {
 	var res = &Value{
 		Type: "map_ConsensusMsg",
 		Payload: Map{

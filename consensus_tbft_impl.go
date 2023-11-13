@@ -16,7 +16,6 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/fixed-g/consensusfuzz/v2/fuzzlib"
 	"reflect"
 	"strconv"
 	"sync"
@@ -384,7 +383,7 @@ func (consensus *ConsensusTBFTImpl) sendProposeState(isProposer bool) {
 	// TODO: mutate here (true / false)
 	// TODO: type = mutateType(msgbus.ProposeState);isProposer = mutateBool(isPoposer);
 	consensus.logger.Infof("fuzzing started")
-	isProposer = fuzzlib.MutateBool(isProposer)
+	isProposer = MutateBool(isProposer)
 	consensus.msgbus.PublishSafe(msgbus.ProposeState, isProposer)
 }
 
@@ -1016,7 +1015,7 @@ func (consensus *ConsensusTBFTImpl) procPropose(proposal *tbftpb.Proposal) {
 	consensus.VerifingProposal = NewTBFTProposal(proposal, false)
 	// Tell the consensus module to perform block validation
 	// TODO: type = mutateType(msgbus.VerifyBlock); block = mutateBlock(proposal.Block);
-	block, err := fuzzlib.MutateBlock(proposal.Block)
+	block, err := MutateBlock(proposal.Block)
 	if err != nil {
 		consensus.logger.Errorf(err.Error())
 		return
@@ -1342,7 +1341,7 @@ func (consensus *ConsensusTBFTImpl) commitBlock(block *common.Block, voteSet *tb
 	block.AdditionalData.ExtraData[TBFTAddtionalDataKey] = qc
 	// TODO: need mutate
 	// TODO: type = mutateType(msgbus.commitBlock); block = mutateBlock(block);
-	new_block, err := fuzzlib.MutateBlock(block)
+	new_block, err := MutateBlock(block)
 	if err != nil {
 		consensus.logger.Errorf(err.Error())
 		return
@@ -1528,7 +1527,7 @@ func (consensus *ConsensusTBFTImpl) delInvalidTxs(vs *VoteSet, hash []byte) {
 				consensus.Id, consensus.Height, consensus.Round, consensus.Step)
 			// TODO: need mutate
 			// TODO: type = mutateType(msgbus.RwSetVerifyFailTxs); payload = mutatePayload(payload);
-			new_payload, err := fuzzlib.MutateTxs(payload)
+			new_payload, err := MutateTxs(payload)
 			if err != nil {
 				consensus.logger.Errorf(err.Error())
 				return
@@ -1859,7 +1858,7 @@ func (consensus *ConsensusTBFTImpl) enterPrevote(height uint64, round int32) {
 	prevoteMsg := createPrevoteConsensusMsg(prevote)
 	// TODO: 发送给自己的内部消息
 	// TODO: prevoteMsg = mutateConsensusMsg(prevoteMsg);
-	prevoteMsg, err = fuzzlib.MutateVoteMsg(prevoteMsg)
+	prevoteMsg, err = MutateVoteMsg(prevoteMsg)
 	if err != nil {
 		consensus.logger.Errorf(err.Error())
 		return
@@ -1944,7 +1943,7 @@ func (consensus *ConsensusTBFTImpl) enterPrecommit(height uint64, round int32) {
 	precommitMsg := createPrecommitConsensusMsg(precommit)
 	// TODO: 内部消息
 	// TODO: precommitMsg = mutateConsensusMsg(precommitMsg);
-	precommitMsg, err = fuzzlib.MutateVoteMsg(precommitMsg)
+	precommitMsg, err = MutateVoteMsg(precommitMsg)
 	if err != nil {
 		consensus.logger.Errorf(err.Error())
 		return

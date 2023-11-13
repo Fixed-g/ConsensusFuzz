@@ -1,4 +1,4 @@
-package fuzzlib
+package tbft
 
 import (
 	"encoding/json"

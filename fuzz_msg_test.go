@@ -1,11 +1,10 @@
-package fuzzlib
+package tbft
 
 import (
 	"chainmaker.org/chainmaker/pb-go/v2/common"
 	tbftpb "chainmaker.org/chainmaker/pb-go/v2/consensus/tbft"
 	"encoding/json"
 	"fmt"
-	tbft "github.com/fixed-g/consensusfuzz/v2"
 	"github.com/mitchellh/mapstructure"
 	"io/ioutil"
 	"os"
@@ -13,7 +12,7 @@ import (
 )
 
 func TestFunc(t *testing.T) {
-	msg := &tbft.ConsensusMsg{
+	msg := &ConsensusMsg{
 		Type: tbftpb.TBFTMsgType_MSG_PREVOTE,
 		Msg: &tbftpb.Vote{
 			Type:        1,
