@@ -75,7 +75,7 @@ func MutateBool(b bool) bool {
 func MutateBlock(block *common.Block) (*common.Block, error) {
 	var err error
 	var block_map map[string]interface{}
-	block_map, err = StructToMap(block)
+	block_map, err = StructToMap(*block)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +90,7 @@ func MutateBlock(block *common.Block) (*common.Block, error) {
 func MutateProposal(proposal *TBFTProposal) (*TBFTProposal, error) {
 	var err error
 	var proposal_map map[string]interface{}
-	proposal_map, err = StructToMap(proposal)
+	proposal_map, err = StructToMap(*proposal)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func MutateProposal(proposal *TBFTProposal) (*TBFTProposal, error) {
 func MutateVote(vote *tbftpb.Vote) (*tbftpb.Vote, error) {
 	var err error
 	var vote_map map[string]interface{}
-	vote_map, err = StructToMap(vote)
+	vote_map, err = StructToMap(*vote)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +120,7 @@ func MutateVote(vote *tbftpb.Vote) (*tbftpb.Vote, error) {
 func MutateTxs(txs *consensus.RwSetVerifyFailTxs) (*consensus.RwSetVerifyFailTxs, error) {
 	var err error
 	var txs_map map[string]interface{}
-	txs_map, err = StructToMap(txs)
+	txs_map, err = StructToMap(*txs)
 	if err != nil {
 		return nil, err
 	}
@@ -135,7 +135,7 @@ func MutateTxs(txs *consensus.RwSetVerifyFailTxs) (*consensus.RwSetVerifyFailTxs
 func MutateVoteMsg(msg *ConsensusMsg) (*ConsensusMsg, error) {
 	var err error
 	var msg_map map[string]interface{}
-	msg_map, err = StructToMap(msg)
+	msg_map, err = StructToMap(*msg)
 	if err != nil {
 		return nil, err
 	}
@@ -150,7 +150,7 @@ func MutateVoteMsg(msg *ConsensusMsg) (*ConsensusMsg, error) {
 func MutateProposalMsg(msg *ConsensusMsg) (*ConsensusMsg, error) {
 	var err error
 	var msg_map map[string]interface{}
-	msg_map, err = StructToMap(msg)
+	msg_map, err = StructToMap(*msg)
 	if err != nil {
 		return nil, err
 	}
