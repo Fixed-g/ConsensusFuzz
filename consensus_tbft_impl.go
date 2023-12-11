@@ -8,10 +8,6 @@ package tbft
 
 import (
 	"bytes"
-	"chainmaker.org/chainmaker/chainconf/v2"
-	"chainmaker.org/chainmaker/localconf/v2"
-	"chainmaker.org/chainmaker/protocol/v2"
-	"chainmaker.org/chainmaker/utils/v2"
 	"context"
 	"encoding/base64"
 	"errors"
@@ -20,6 +16,11 @@ import (
 	"strconv"
 	"sync"
 	"time"
+
+	"chainmaker.org/chainmaker/chainconf/v2"
+	"chainmaker.org/chainmaker/localconf/v2"
+	"chainmaker.org/chainmaker/protocol/v2"
+	"chainmaker.org/chainmaker/utils/v2"
 
 	"chainmaker.org/chainmaker/common/v2/msgbus"
 	consensusUtils "chainmaker.org/chainmaker/consensus-utils/v2"
@@ -191,6 +192,8 @@ type ConsensusTBFTImpl struct {
 	consistentEngine consistent_service.ConsistentEngine
 	// use block verifier from core module
 	blockVerifier protocol.BlockVerifier
+
+	messagePool MessagePool
 }
 
 // Type return Status Type(ConsistentEngine)
@@ -263,6 +266,8 @@ func New(config *consensusUtils.ConsensusImplConfig) (*ConsensusTBFTImpl, error)
 	if broadcasterInterval != 0 {
 		TimerInterval = broadcasterInterval * time.Millisecond
 	}
+
+	consensus.messagePool = *newMessagePool(20, make([]*ConsensusMsg, 0))
 	return consensus, nil
 }
 
@@ -389,6 +394,7 @@ func (consensus *ConsensusTBFTImpl) sendProposeState(isProposer bool) {
 
 // Stop implements the Stop method of ConsensusEngine interface.
 func (consensus *ConsensusTBFTImpl) Stop() error {
+	displayMsgPool(consensus, &consensus.messagePool)
 	consensus.Lock()
 	defer consensus.Unlock()
 
@@ -672,6 +678,7 @@ func (consensus *ConsensusTBFTImpl) handle() {
 
 	loop := true
 	for loop {
+		// fmt.Println("State_test:", consensus.ConsensusState.Step)
 		select {
 		case proposedBlock := <-consensus.proposedBlockC:
 			consensus.handleProposedBlock(proposedBlock)
@@ -680,9 +687,13 @@ func (consensus *ConsensusTBFTImpl) handle() {
 		case height := <-consensus.blockHeightC:
 			consensus.handleBlockHeight(height)
 		case msg := <-consensus.externalMsgC:
+			// add consensus message to message pool
+			addMsgToPool(&consensus.messagePool, msg)
 			consensus.logger.Debugf("[%s] receive from externalMsgC %s", consensus.Id, msg.Type)
 			consensus.handleConsensusMsg(msg)
 		case msg := <-consensus.internalMsgC:
+			// add consensus message to message pool
+			addMsgToPool(&consensus.messagePool, msg)
 			consensus.logger.Debugf("[%s] receive from internalMsgC %s", consensus.Id, msg.Type)
 			consensus.handleConsensusMsg(msg)
 		case ti := <-consensus.timeScheduler.GetTimeoutC():
@@ -1709,6 +1720,7 @@ func (consensus *ConsensusTBFTImpl) enterPropose(height uint64, round int32) {
 				Block:    consensus.ValidProposal.Block,
 				TxsRwSet: consensus.ValidProposal.TxsRwSet,
 			}
+			// TODO: proposedBlock channel消息变异?
 			consensus.proposedBlockC <- &proposedProposal{
 				proposedBlock: proposalBlock,
 				qc:            consensus.ValidProposal.Qc,
@@ -1855,10 +1867,16 @@ func (consensus *ConsensusTBFTImpl) enterPrevote(height uint64, round int32) {
 	}
 	signPrevoteTime := CurrentTime()
 
-	prevoteMsg := createPrevoteConsensusMsg(prevote)
 	// TODO: 发送给自己的内部消息
 	// TODO: prevoteMsg = mutateConsensusMsg(prevoteMsg);
+	prevoteMsg := findLatestMsgWithType(&consensus.messagePool, tbftpb.TBFTMsgType_MSG_PREVOTE)
+
+	if prevoteMsg == nil {
+		prevoteMsg = createPrevoteConsensusMsg(prevote)
+	}
+
 	prevoteMsg, err = MutateVoteMsg(prevoteMsg)
+
 	if err != nil {
 		consensus.logger.Errorf(err.Error())
 		return
@@ -1940,7 +1958,11 @@ func (consensus *ConsensusTBFTImpl) enterPrecommit(height uint64, round int32) {
 	}
 	signPrecommitTime := CurrentTime()
 
-	precommitMsg := createPrecommitConsensusMsg(precommit)
+	precommitMsg := findLatestMsgWithType(&consensus.messagePool, tbftpb.TBFTMsgType_MSG_PRECOMMIT)
+
+	if precommitMsg == nil {
+		precommitMsg = createPrecommitConsensusMsg(precommit)
+	}
 	// TODO: 内部消息
 	// TODO: precommitMsg = mutateConsensusMsg(precommitMsg);
 	precommitMsg, err = MutateVoteMsg(precommitMsg)
