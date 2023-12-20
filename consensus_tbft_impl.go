@@ -388,8 +388,9 @@ func (consensus *ConsensusTBFTImpl) sendProposeState(isProposer bool) {
 	// TODO: mutate here (true / false)
 	// TODO: type = mutateType(msgbus.ProposeState);isProposer = mutateBool(isPoposer);
 	consensus.logger.Infof("fuzzing started")
-	isProposer = MutateBool(isProposer)
-	consensus.msgbus.PublishSafe(msgbus.ProposeState, isProposer)
+	new_isProposer := MutateBool(isProposer)
+	consensus.logger.Infof("[mutate] isProposer: %d to %d", isProposer, new_isProposer)
+	consensus.msgbus.PublishSafe(msgbus.ProposeState, new_isProposer)
 }
 
 // Stop implements the Stop method of ConsensusEngine interface.
@@ -1026,6 +1027,7 @@ func (consensus *ConsensusTBFTImpl) procPropose(proposal *tbftpb.Proposal) {
 	consensus.VerifingProposal = NewTBFTProposal(proposal, false)
 	// Tell the consensus module to perform block validation
 	// TODO: type = mutateType(msgbus.VerifyBlock); block = mutateBlock(proposal.Block);
+	//consensus.logger.Infof("[mutate] block: %d to %d", isProposer, new_isProposer)
 	block, err := MutateBlock(proposal.Block)
 	if err != nil {
 		consensus.logger.Errorf(err.Error())
@@ -1669,7 +1671,6 @@ func (consensus *ConsensusTBFTImpl) enterNewRound(height uint64, round int32) {
 		consensus.Round > round ||
 		(consensus.Round == round && consensus.Step != tbftpb.Step_NEW_HEIGHT) {
 		consensus.logger.Infof("[%s](%v/%v/%v) enter new round invalid(%v/%v)",
-
 			consensus.Id, consensus.Height, consensus.Round, consensus.Step, height, round)
 		return
 	}
@@ -1720,7 +1721,6 @@ func (consensus *ConsensusTBFTImpl) enterPropose(height uint64, round int32) {
 				Block:    consensus.ValidProposal.Block,
 				TxsRwSet: consensus.ValidProposal.TxsRwSet,
 			}
-			// TODO: proposedBlock channel消息变异?
 			consensus.proposedBlockC <- &proposedProposal{
 				proposedBlock: proposalBlock,
 				qc:            consensus.ValidProposal.Qc,
@@ -1931,7 +1931,7 @@ func (consensus *ConsensusTBFTImpl) enterPrecommit(height uint64, round int32) {
 		case isNilHash(hash):
 			// +2/3 prevoted nil. Unlock and precommit nil.
 			if consensus.LockedProposal == nil {
-				consensus.logger.Debugf("precommit step; +2/3 prevoted for nil")
+				consensus.logger.Debugf("recommit step; +2/3 prevoted for nil")
 			} else {
 				consensus.logger.Debugf("precommit step; +2/3 prevoted for nil; unlocking")
 				consensus.LockedRound = -1
