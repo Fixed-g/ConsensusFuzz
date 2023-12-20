@@ -3,7 +3,6 @@ package tbft
 import (
 	"errors"
 	"fmt"
-	"github.com/iancoleman/strcase"
 	"reflect"
 	"strconv"
 )
@@ -36,7 +35,6 @@ func StructToMap(config interface{}) (map[string]interface{}, error) {
 			continue
 		}
 		configField := field.Name
-		snakeConfigField := strcase.ToSnake(configField)
 		rv := configValue.Field(i)
 		// changed here
 		if rv.Kind() == reflect.Interface {
@@ -44,33 +42,33 @@ func StructToMap(config interface{}) (map[string]interface{}, error) {
 		}
 		switch rv.Kind() {
 		case reflect.Int:
-			result[snakeConfigField] = parseInt(rv)
+			result[configField] = parseInt(rv)
 		case reflect.Int8:
-			result[snakeConfigField] = parseInt8(rv)
+			result[configField] = parseInt8(rv)
 		case reflect.Int16:
-			result[snakeConfigField] = parseInt16(rv)
+			result[configField] = parseInt16(rv)
 		case reflect.Int32:
-			result[snakeConfigField] = parseInt32(rv)
+			result[configField] = parseInt32(rv)
 		case reflect.Int64:
-			result[snakeConfigField] = parseInt64(rv)
+			result[configField] = parseInt64(rv)
 		case reflect.Uint:
-			result[snakeConfigField] = parseUint(rv)
+			result[configField] = parseUint(rv)
 		case reflect.Uint8:
-			result[snakeConfigField] = parseUint8(rv)
+			result[configField] = parseUint8(rv)
 		case reflect.Uint16:
-			result[snakeConfigField] = parseUint16(rv)
+			result[configField] = parseUint16(rv)
 		case reflect.Uint32:
-			result[snakeConfigField] = parseUint32(rv)
+			result[configField] = parseUint32(rv)
 		case reflect.Uint64:
-			result[snakeConfigField] = parseUint64(rv)
+			result[configField] = parseUint64(rv)
 		case reflect.Float32:
-			result[snakeConfigField] = parseFloat32(rv)
+			result[configField] = parseFloat32(rv)
 		case reflect.Float64:
-			result[snakeConfigField] = parseFloat64(rv)
+			result[configField] = parseFloat64(rv)
 		case reflect.String:
-			result[snakeConfigField] = parseString(rv)
+			result[configField] = parseString(rv)
 		case reflect.Bool:
-			result[snakeConfigField] = parseBool(rv)
+			result[configField] = parseBool(rv)
 		case reflect.Ptr:
 			v, err := parsePtr(rv)
 			if err != nil {
@@ -81,13 +79,13 @@ func StructToMap(config interface{}) (map[string]interface{}, error) {
 			if v == nil {
 				continue
 			}
-			result[snakeConfigField] = v
+			result[configField] = v
 		case reflect.Map:
 			v := parseMap(rv)
 			if v == nil {
 				continue
 			}
-			result[snakeConfigField] = v
+			result[configField] = v
 		case reflect.Slice:
 			v, err := parseSlice(rv)
 			if err != nil {
@@ -98,13 +96,13 @@ func StructToMap(config interface{}) (map[string]interface{}, error) {
 			if v == nil {
 				continue
 			}
-			result[snakeConfigField] = v
+			result[configField] = v
 		case reflect.Struct:
 			v, err := StructToMap(rv.Interface())
 			if err != nil {
 				return nil, err
 			}
-			result[snakeConfigField] = v
+			result[configField] = v
 		default:
 			errMsg := fmt.Sprintf("structToMap fail, unknow value type, type is %s, value is %v\n",
 				rv.Kind(), rv)

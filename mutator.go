@@ -32,13 +32,13 @@ func generate_edge_value_with_type(number interface{}) (interface{}, interface{}
 	case uint64:
 		return uint64(0), uint64(math.MaxUint64)
 	case int:
-		return math.MinInt32, math.MaxInt32
+		return int(math.MinInt32), int(math.MaxInt32)
 	case int8:
-		return math.MinInt8, math.MaxInt8
+		return int8(math.MinInt8), int8(math.MaxInt8)
 	case int16:
-		return math.MinInt16, math.MaxInt16
+		return int16(math.MinInt16), int16(math.MaxInt16)
 	case int32:
-		return math.MinInt32, math.MaxInt32
+		return int32(math.MinInt32), int32(math.MaxInt32)
 	case int64:
 		return int64(math.MinInt64), int64(math.MaxInt64)
 	case float32:
@@ -85,25 +85,25 @@ func generate_random_number_with_type(number interface{}) interface{} {
 func generate_random_number_with_range(lower interface{}, upper interface{}) interface{} {
 	switch lower.(type) {
 	case uint:
-		return generate_random_unsigned_integer_number_with_range(uint64(lower.(uint)), uint64(upper.(uint)))
+		return uint(generate_random_unsigned_integer_number_with_range(uint64(lower.(uint)), uint64(upper.(uint))))
 	case uint8:
-		return generate_random_unsigned_integer_number_with_range(uint64(lower.(uint8)), uint64(upper.(uint8)))
+		return uint8(generate_random_unsigned_integer_number_with_range(uint64(lower.(uint8)), uint64(upper.(uint8))))
 	case uint16:
-		return generate_random_unsigned_integer_number_with_range(uint64(lower.(uint16)), uint64(upper.(uint16)))
+		return uint16(generate_random_unsigned_integer_number_with_range(uint64(lower.(uint16)), uint64(upper.(uint16))))
 	case uint32:
-		return generate_random_unsigned_integer_number_with_range(uint64(lower.(uint32)), uint64(upper.(uint32)))
+		return uint32(generate_random_unsigned_integer_number_with_range(uint64(lower.(uint32)), uint64(upper.(uint32))))
 	case uint64:
-		return generate_random_unsigned_integer_number_with_range(uint64(lower.(uint64)), uint64(upper.(uint64)))
+		return uint64(generate_random_unsigned_integer_number_with_range(uint64(lower.(uint64)), uint64(upper.(uint64))))
 	case int:
-		return generate_random_signed_integer_number_with_range(int(lower.(int)), int(upper.(int)))
+		return int(generate_random_signed_integer_number_with_range(int(lower.(int)), int(upper.(int))))
 	case int8:
-		return generate_random_signed_integer_number_with_range(int(lower.(int8)), int(upper.(int8)))
+		return int8(generate_random_signed_integer_number_with_range(int(lower.(int8)), int(upper.(int8))))
 	case int16:
-		return generate_random_signed_integer_number_with_range(int(lower.(int16)), int(upper.(int16)))
+		return int16(generate_random_signed_integer_number_with_range(int(lower.(int16)), int(upper.(int16))))
 	case int32:
-		return generate_random_signed_integer_number_with_range(int(lower.(int32)), int(upper.(int32)))
+		return int32(generate_random_signed_integer_number_with_range(int(lower.(int32)), int(upper.(int32))))
 	case int64:
-		return generate_random_signed_long_integer_number_with_range(int64(lower.(int64)), int64(upper.(int64)))
+		return int64(generate_random_signed_long_integer_number_with_range(int64(lower.(int64)), int64(upper.(int64))))
 	case float32:
 		return generate_random_float32_number_with_range(lower.(float32), upper.(float32))
 	case float64:

@@ -15,7 +15,9 @@ type MessagePool struct {
 
 func newMessagePool(cap int, msgs []*ConsensusMsg) *MessagePool {
 	var messagePoolTemp = &MessagePool{}
+
 	messagePoolTemp.cap = cap
+	messagePoolTemp.pool = make(map[string]*MessageQueue)
 
 	for i := range msgs {
 		addMsgToPool(messagePoolTemp, msgs[i])
@@ -26,7 +28,15 @@ func newMessagePool(cap int, msgs []*ConsensusMsg) *MessagePool {
 
 // add consensus message to message pool
 func addMsgToPool(messagePool *MessagePool, message *ConsensusMsg) *MessagePool {
-	println("add %s message to pool;", message.Type)
+	println("add %s message to pool;", message.Type.String())
+
+	if _, ok := messagePool.pool[message.Type.String()]; !ok {
+		queue_tmp := &MessageQueue{
+			messages: make([]*ConsensusMsg, 0),
+		}
+		messagePool.pool[message.Type.String()] = queue_tmp
+	}
+
 	messagePool.pool[message.Type.String()].messages = append(messagePool.pool[message.Type.String()].messages, message)
 
 	for len(messagePool.pool[message.Type.String()].messages) > messagePool.cap {

@@ -1872,8 +1872,13 @@ func (consensus *ConsensusTBFTImpl) enterPrevote(height uint64, round int32) {
 	prevoteMsg := findLatestMsgWithType(&consensus.messagePool, tbftpb.TBFTMsgType_MSG_PREVOTE)
 
 	if prevoteMsg == nil {
+		//test debug
+		consensus.logger.Debugf("we don't find prevoteMsg in pool")
 		prevoteMsg = createPrevoteConsensusMsg(prevote)
 	}
+
+	//debug test
+	consensus.logger.Debugf("test %s", prevoteMsg)
 
 	prevoteMsg, err = MutateVoteMsg(prevoteMsg)
 

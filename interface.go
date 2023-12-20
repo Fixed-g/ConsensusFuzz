@@ -42,7 +42,7 @@ func MapToVoteMsg(m map[string]interface{}) *ConsensusMsg {
 		return nil
 	}
 	return &ConsensusMsg{
-		Type: m["Type"].(tbftpb.TBFTMsgType),
+		Type: tbftpb.TBFTMsgType(m["Type"].(int32)),
 		Msg:  mustMarshal(vote),
 	}
 }
@@ -54,7 +54,7 @@ func MapToProposalMsg(m map[string]interface{}) *ConsensusMsg {
 		return nil
 	}
 	return &ConsensusMsg{
-		Type: m["Type"].(tbftpb.TBFTMsgType),
+		Type: tbftpb.TBFTMsgType(m["Type"].(int32)),
 		Msg:  mustMarshal(proposal),
 	}
 }
@@ -132,10 +132,15 @@ func MutateTxs(txs *consensus.RwSetVerifyFailTxs) (*consensus.RwSetVerifyFailTxs
 	return txs, nil
 }
 
+// 需要指定consensusMsg类型
 func MutateVoteMsg(msg *ConsensusMsg) (*ConsensusMsg, error) {
 	var err error
 	var msg_map map[string]interface{}
 	msg_map, err = StructToMap(*msg)
+
+	//debug test
+	// fmt.Println(msg_map)
+
 	if err != nil {
 		return nil, err
 	}
