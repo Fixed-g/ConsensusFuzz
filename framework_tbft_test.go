@@ -118,7 +118,10 @@ func TestOnlyConsensus_TBFT(t *testing.T) {
 	logger.SetLogConfig(l)
 
 	tf.Start()
-	time.Sleep(60 * time.Second)
+
+	// time.Sleep(60 * time.Second)
+	time.Sleep(2 * time.Hour)
+
 	tf.Stop()
 
 	cmd = exec.Command("/bin/sh", "-c", "cat default.*|grep TPS")
