@@ -5,12 +5,14 @@ import (
 	"chainmaker.org/chainmaker/pb-go/v2/consensus"
 	consensuspb "chainmaker.org/chainmaker/pb-go/v2/consensus"
 	tbftpb "chainmaker.org/chainmaker/pb-go/v2/consensus/tbft"
+	"encoding/json"
 	"github.com/mitchellh/mapstructure"
 )
 
 func MapToBlock(m map[string]interface{}) *common.Block {
 	block := &common.Block{}
-	err := mapstructure.Decode(m, block)
+	bt, err := json.Marshal(m)
+	err = json.Unmarshal(bt, block)
 	if err != nil {
 		return nil
 	}

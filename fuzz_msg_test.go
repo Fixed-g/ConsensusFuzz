@@ -49,19 +49,27 @@ func TestFunc(t *testing.T) {
 		"Qc":          nil,
 	}
 	vote := &tbftpb.Vote{}
-	proposal := &tbftpb.Proposal{}
+	json_proposal := &tbftpb.Proposal{}
+	ms_proposal := &tbftpb.Proposal{}
 	fmt.Println("proposal_map:", proposal_map)
-	err := mapstructure.Decode(proposal_map, proposal)
+	bt, err := json.Marshal(proposal_map)
+	err = mapstructure.Decode(proposal_map, ms_proposal)
+	fmt.Println("ms_proposal:", ms_proposal)
 	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}
-	fmt.Println("proposal:", proposal)
+	fmt.Println("proposal_bytes:", string(bt))
+	err = json.Unmarshal(bt, json_proposal)
+	if err != nil {
+		return
+	}
+	fmt.Println("json_proposal:", json_proposal)
+	*proposal_map, err = StructToMap(*json_proposal)
+	fmt.Println("proposal_map:", proposal_map)
 	msg = msg
 	vote = vote
 	vote_map = vote_map
-	new_proposal_map, _ := StructToMap(*proposal)
-	fmt.Println("new_proposal_map:", new_proposal_map)
 }
 
 func TestBlock(t *testing.T) {
@@ -81,6 +89,7 @@ func TestBlock(t *testing.T) {
 	}
 	//_, _ = fmt.Fprintln(out, block)
 	msg_map, _ := StructToMap(*block)
+	fmt.Println(msg_map)
 	msg_json, err := json.Marshal(msg_map)
 	if err != nil {
 		fmt.Println(err.Error())

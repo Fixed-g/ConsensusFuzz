@@ -14,6 +14,7 @@ require (
 	chainmaker.org/chainmaker/utils/v2 v2.3.3
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang/mock v1.6.0
+	github.com/hpcloud/tail v1.0.0
 	github.com/iancoleman/strcase v0.1.3
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/stretchr/testify v1.8.0
