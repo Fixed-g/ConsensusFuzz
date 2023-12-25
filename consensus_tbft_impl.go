@@ -373,9 +373,27 @@ func (consensus *ConsensusTBFTImpl) Start() error {
 		}
 
 		//consensus.gossip.start()
+		go consensus.startLogReader()
 		go consensus.handle()
 	}()
 	return nil
+}
+
+func (consensus *ConsensusTBFTImpl) startLogReader() {
+	consensus.logger.Infof("fuzzing: [%s] logReader start", consensus.Id)
+	defer consensus.logger.Infof("fuzzing: [%s] logReader end", consensus.Id)
+	// 检查共识日志
+	for true {
+		time.Sleep(time.Second)
+		consensus.logger.Infof("fuzzing: ReadSystemLog...")
+		for i := 2; i <= 4; i = i + 1 {
+			err := ReadSystemLog(i, &consensus.logger)
+			if err != nil {
+				consensus.logger.Errorf("fuzzing: LogReader failed:" + err.Error())
+				return
+			}
+		}
+	}
 }
 
 // sendProposeState
@@ -703,15 +721,6 @@ func (consensus *ConsensusTBFTImpl) handle() {
 			consensus.handleProposeOptimalTimeout()
 		case <-consensus.closeC:
 			loop = false
-		}
-		// 开始检查共识日志
-		consensus.logger.Infof("fuzzing: ReadSystemLog...")
-		for i := 2; i <= 4; i = i + 1 {
-			err := ReadSystemLog(i, consensus.logger)
-			if err != nil {
-				consensus.logger.Errorf("fuzzing: LogReader failed:" + err.Error())
-				return
-			}
 		}
 	}
 }

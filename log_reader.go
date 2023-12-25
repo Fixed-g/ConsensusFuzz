@@ -144,7 +144,7 @@ var Requestcache = &Cache{
 	store: make(map[string]KeyValue),
 }
 
-func ReadSystemLog(id int, logger protocol.Logger) error {
+func ReadSystemLog(id int, logger *protocol.Logger) error {
 	cfg := tail.Config{
 		ReOpen: true, // 当文件被移动或删除后，tail 将尝试重新打开文件
 		Follow: true, // 是否跟随,类似tail -f 命令
