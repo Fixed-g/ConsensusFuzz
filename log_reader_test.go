@@ -91,7 +91,5 @@ func TestFun(t *testing.T) {
 	//r := strings.Index(message, ")")
 	//fmt.Printf("l:%d, r:%d, str:[%s]\n", l, r, message[l+1:r])
 	//fmt.Println(flag)
-
-	var testT = time.Time{}
-	fmt.Println(testT)
+	fmt.Println(state[0].Round)
 }

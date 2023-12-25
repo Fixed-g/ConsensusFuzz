@@ -373,6 +373,19 @@ func (consensus *ConsensusTBFTImpl) Start() error {
 		}
 
 		//consensus.gossip.start()
+		// 开始检查共识日志
+		go func() {
+			for {
+				time.Sleep(time.Second)
+				consensus.logger.Infof("ReadSystemLog...")
+				for i := 2; i <= 4; i = i + 1 {
+					err = ReadSystemLog(i, consensus.logger)
+					if err != nil {
+						return
+					}
+				}
+			}
+		}()
 		go consensus.handle()
 	}()
 	return nil

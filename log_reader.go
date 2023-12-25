@@ -40,7 +40,7 @@ type NodeState struct {
 	Step string
 }
 
-var state = [5]NodeState{
+var state = &[5]NodeState{
 	{
 		time:   time.Time{},
 		Height: 0,
@@ -161,28 +161,28 @@ func ReadSystemLog(id int, logger protocol.Logger) error {
 
 	layout := "2006-01-02 15:04:05.000"
 	nowTime := time.Now()
-	// 定期清理过期数据
-	go func() {
-		for {
-			time.Sleep(time.Second) // 每分钟检查一次过期数据
-
-			Requestcache.mu.Lock()
-			for key, item := range Requestcache.store {
-				if time.Now().After(item.Expiration) {
-					delete(Requestcache.store, key)
-				}
-			}
-			Requestcache.mu.Unlock()
-
-			ParamsMap.mu.Lock()
-			for key, item := range ParamsMap.store {
-				if time.Now().After(item.Expiration) {
-					delete(ParamsMap.store, key)
-				}
-			}
-			ParamsMap.mu.Unlock()
-		}
-	}()
+	//// 定期清理过期数据
+	//go func() {
+	//	for {
+	//		time.Sleep(time.Second) // 每分钟检查一次过期数据
+	//
+	//		Requestcache.mu.Lock()
+	//		for key, item := range Requestcache.store {
+	//			if time.Now().After(item.Expiration) {
+	//				delete(Requestcache.store, key)
+	//			}
+	//		}
+	//		Requestcache.mu.Unlock()
+	//
+	//		ParamsMap.mu.Lock()
+	//		for key, item := range ParamsMap.store {
+	//			if time.Now().After(item.Expiration) {
+	//				delete(ParamsMap.store, key)
+	//			}
+	//		}
+	//		ParamsMap.mu.Unlock()
+	//	}
+	//}()
 
 	for line := range tails.Lines {
 		linetr := line.Text
