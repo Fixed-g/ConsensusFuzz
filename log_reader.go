@@ -207,7 +207,7 @@ func ReadSystemLog(id int, logger protocol.Logger) error {
 		// 解析日志级别
 		if strings.Contains(level, "ERROR") && !isFilterError(message) {
 			//处理日志,将错误日志打印出来,并找到匹配的对象加入corpors
-			logger.Errorf("Error occurred:%s", message)
+			logger.Errorf("fuzzing: Error occurred:%s", message)
 		} else {
 			flag, _ := regexp.MatchString("\\([0-9]*/[0-9]*/\\w*\\)", message)
 			//记录上次请求的request
@@ -227,7 +227,7 @@ func ReadSystemLog(id int, logger protocol.Logger) error {
 					// 与进入该状态的时间差
 					delta := t.Sub(n.time).Minutes()
 					if delta > 5 { // 超过5min未更新状态
-						logger.Errorf("Long time not changed: node:%d state:(%d/%d/%s)", id, height, round, step)
+						logger.Errorf("fuzzing: Long time not changed: node:%d state:(%d/%d/%s)", id, height, round, step)
 					}
 				} else {
 					n.time = t
