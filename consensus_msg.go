@@ -56,6 +56,7 @@ func (consensus *ConsensusTBFTImpl) sendConsensusProposal(proposal *TBFTProposal
 	}
 	msg := createProposalTBFTMsg(new_proposal)
 	consensus.logger.Infof("%s send consensus proposal", consensus.Id)
+	consensus.logger.Debugf("we mutate proposal message in sendConsensusProposal function and send it ")
 	consensus.sendConsensusMsg(msg, to)
 }
 
@@ -80,5 +81,6 @@ func (consensus *ConsensusTBFTImpl) sendConsensusVote(vote *tbftpb.Vote, to stri
 	}
 
 	consensus.logger.Infof("%s send consensus %s", consensus.Id, vote.String())
+	consensus.logger.Debugf("we mutate vote message in sendConsensusVote function and send it ")
 	consensus.sendConsensusMsg(msg, to)
 }

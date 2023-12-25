@@ -119,8 +119,8 @@ func TestOnlyConsensus_TBFT(t *testing.T) {
 
 	tf.Start()
 
-	// time.Sleep(60 * time.Second)
-	time.Sleep(2 * time.Hour)
+	time.Sleep(60 * time.Second)
+	// time.Sleep(2 * time.Hour)
 
 	tf.Stop()
 

@@ -389,6 +389,7 @@ func (consensus *ConsensusTBFTImpl) sendProposeState(isProposer bool) {
 	// TODO: type = mutateType(msgbus.ProposeState);isProposer = mutateBool(isPoposer);
 	consensus.logger.Infof("fuzzing started")
 	isProposer = MutateBool(isProposer)
+	consensus.logger.Debugf("we mutate proposestate message in sendProposeState function and send it")
 	consensus.msgbus.PublishSafe(msgbus.ProposeState, isProposer)
 }
 
@@ -812,6 +813,7 @@ func (consensus *ConsensusTBFTImpl) handleProposedBlock(proposedProposal *propos
 		signProposalTime.Sub(receiveBlockTime).Milliseconds())
 
 	// Broadcast proposal
+	// we have done mutate in sendConsensusProposal
 	consensus.sendConsensusProposal(consensus.Proposal, "")
 	// Enter the prevote stage
 	consensus.enterPrevote(consensus.Height, consensus.Round)
@@ -1031,6 +1033,8 @@ func (consensus *ConsensusTBFTImpl) procPropose(proposal *tbftpb.Proposal) {
 		consensus.logger.Errorf(err.Error())
 		return
 	}
+
+	consensus.logger.Debugf("we mutate block message in procPropose function and send it")
 	consensus.msgbus.PublishSafe(msgbus.VerifyBlock, block)
 
 	consensus.logger.Infof("[%s](%d/%d/%s) processed proposal (%d/%d/%x), time[verify:%dms]",
@@ -1227,6 +1231,7 @@ func (consensus *ConsensusTBFTImpl) procLocalVote(vote *tbftpb.Vote) {
 		consensus.Id, consensus.Height, consensus.Round, consensus.Step,
 		vote.Voter, vote.Height, vote.Round, vote.Type, vote.Hash)
 	// Broadcast your vote to others
+	// mutate todo
 	consensus.sendConsensusVote(vote, "")
 }
 
@@ -1357,6 +1362,8 @@ func (consensus *ConsensusTBFTImpl) commitBlock(block *common.Block, voteSet *tb
 		consensus.logger.Errorf(err.Error())
 		return
 	}
+
+	consensus.logger.Debugf("we mutate CommitBlock message in commitBlock function and send it")
 	consensus.msgbus.Publish(msgbus.CommitBlock, new_block)
 
 	consensus.logger.Infof("[%s](%d/%d/%s) consensus commit block (%d/%x), time[marshalQC:%dms]",
@@ -1441,6 +1448,8 @@ func (consensus *ConsensusTBFTImpl) addVote(vote *tbftpb.Vote, replayMode bool) 
 			}
 		}
 		// Broadcast your vote to others
+
+		//we have done mutate in sendConsensusVote
 		consensus.sendConsensusVote(vote, "")
 	}
 	return nil
@@ -1543,6 +1552,8 @@ func (consensus *ConsensusTBFTImpl) delInvalidTxs(vs *VoteSet, hash []byte) {
 				consensus.logger.Errorf(err.Error())
 				return
 			}
+
+			consensus.logger.Debugf("we mutate Txs message in delInvalidTxs function and send it")
 			consensus.msgbus.PublishSafe(msgbus.RwSetVerifyFailTxs, new_payload)
 		}
 	}
@@ -1720,7 +1731,7 @@ func (consensus *ConsensusTBFTImpl) enterPropose(height uint64, round int32) {
 				Block:    consensus.ValidProposal.Block,
 				TxsRwSet: consensus.ValidProposal.TxsRwSet,
 			}
-			// TODO: proposedBlock channel消息变异?
+			// mutate TODO: proposedBlock channel消息变异?
 			consensus.proposedBlockC <- &proposedProposal{
 				proposedBlock: proposalBlock,
 				qc:            consensus.ValidProposal.Qc,
@@ -1886,6 +1897,8 @@ func (consensus *ConsensusTBFTImpl) enterPrevote(height uint64, round int32) {
 		consensus.logger.Errorf(err.Error())
 		return
 	}
+
+	consensus.logger.Debugf("we mutate prevote message in enterPrevote function and send it as internalMsg")
 	consensus.internalMsgC <- prevoteMsg
 
 	consensus.logger.Infof("[%s](%v/%v/%v) generated prevote (%d/%d/%x), time[sign:%dms]",
@@ -1975,6 +1988,8 @@ func (consensus *ConsensusTBFTImpl) enterPrecommit(height uint64, round int32) {
 		consensus.logger.Errorf(err.Error())
 		return
 	}
+
+	consensus.logger.Debugf("we mutate precommit message in enterPrecommit function and send it as internalMsg")
 	consensus.internalMsgC <- precommitMsg
 
 	consensus.logger.Infof("[%s](%v/%v/%v) generated precommit (%d/%d/%x), time[sign:%dms]",
