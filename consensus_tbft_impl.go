@@ -676,20 +676,6 @@ func (consensus *ConsensusTBFTImpl) extractProposeOptimal(value string) (propose
 func (consensus *ConsensusTBFTImpl) handle() {
 	consensus.logger.Infof("[%s] handle start", consensus.Id)
 	defer consensus.logger.Infof("[%s] handle end", consensus.Id)
-	// 开始检查共识日志
-	go func() {
-		for {
-			time.Sleep(time.Second)
-			consensus.logger.Infof("fuzzing: ReadSystemLog...")
-			for i := 2; i <= 4; i = i + 1 {
-				err := ReadSystemLog(i, consensus.logger)
-				if err != nil {
-					consensus.logger.Errorf("fuzzing: LogReader failed:" + err.Error())
-					return
-				}
-			}
-		}
-	}()
 	loop := true
 	for loop {
 		// fmt.Println("State_test:", consensus.ConsensusState.Step)
@@ -716,6 +702,15 @@ func (consensus *ConsensusTBFTImpl) handle() {
 			consensus.handleProposeOptimalTimeout()
 		case <-consensus.closeC:
 			loop = false
+		}
+		// 开始检查共识日志
+		consensus.logger.Infof("fuzzing: ReadSystemLog...")
+		for i := 2; i <= 4; i = i + 1 {
+			err := ReadSystemLog(i, consensus.logger)
+			if err != nil {
+				consensus.logger.Errorf("fuzzing: LogReader failed:" + err.Error())
+				return
+			}
 		}
 	}
 }
