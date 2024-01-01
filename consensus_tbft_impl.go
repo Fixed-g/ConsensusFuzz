@@ -384,7 +384,6 @@ func (consensus *ConsensusTBFTImpl) startLogReader() {
 	defer consensus.logger.Infof("fuzzing: [%s] logReader end", consensus.Id)
 	// 检查共识日志
 	for true {
-		time.Sleep(time.Second)
 		consensus.logger.Infof("fuzzing: ReadSystemLog...")
 		for i := 2; i <= 4; i = i + 1 {
 			err := ReadSystemLog(i, &consensus.logger)
@@ -407,7 +406,6 @@ func (consensus *ConsensusTBFTImpl) sendProposeState(isProposer bool) {
 	// TODO: type = mutateType(msgbus.ProposeState);isProposer = mutateBool(isPoposer);
 	consensus.logger.Infof("fuzzing started")
 	new_isProposer := MutateBool(isProposer)
-	consensus.logger.Infof("[mutate] isProposer: %d to %d", isProposer, new_isProposer)
 	consensus.logger.Debugf("we mutate proposestate message in sendProposeState function and send it")
 	consensus.msgbus.PublishSafe(msgbus.ProposeState, new_isProposer)
 }
