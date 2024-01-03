@@ -2569,7 +2569,7 @@ func (consensus *ConsensusTBFTImpl) createConsensusMsgFromTBFTMsgBz(tbftMsgBz []
 		mustUnmarshal(tbftMsg.Msg, state)
 
 		//add panic
-		panic("get state message")
+		// panic("get state message")
 
 		return &ConsensusMsg{
 			Type: tbftMsg.Type,
