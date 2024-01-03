@@ -1,11 +1,12 @@
 package tbft
 
 import (
+	"encoding/json"
+
 	"chainmaker.org/chainmaker/pb-go/v2/common"
 	"chainmaker.org/chainmaker/pb-go/v2/consensus"
 	consensuspb "chainmaker.org/chainmaker/pb-go/v2/consensus"
 	tbftpb "chainmaker.org/chainmaker/pb-go/v2/consensus/tbft"
-	"encoding/json"
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -37,26 +38,26 @@ func MapToVote(m map[string]interface{}) *tbftpb.Vote {
 	return vote
 }
 
-func MapToVoteMsg(m map[string]interface{}) *ConsensusMsg {
+func MapToVoteMsg(m map[string]interface{}, t tbftpb.TBFTMsgType) *ConsensusMsg {
 	vote := &tbftpb.Vote{}
 	err := mapstructure.Decode(m["Msg"].(map[string]interface{}), vote)
 	if err != nil {
 		return nil
 	}
 	return &ConsensusMsg{
-		Type: tbftpb.TBFTMsgType(m["Type"].(int32)),
+		Type: tbftpb.TBFTMsgType(t),
 		Msg:  mustMarshal(vote),
 	}
 }
 
-func MapToProposalMsg(m map[string]interface{}) *ConsensusMsg {
+func MapToProposalMsg(m map[string]interface{}, t tbftpb.TBFTMsgType) *ConsensusMsg {
 	proposal := &tbftpb.Proposal{}
 	err := mapstructure.Decode(m["Msg"].(map[string]interface{}), proposal)
 	if err != nil {
 		return nil
 	}
 	return &ConsensusMsg{
-		Type: tbftpb.TBFTMsgType(m["Type"].(int32)),
+		Type: tbftpb.TBFTMsgType(t),
 		Msg:  mustMarshal(proposal),
 	}
 }
@@ -150,7 +151,7 @@ func MutateVoteMsg(msg *ConsensusMsg) (*ConsensusMsg, error) {
 	if err != nil {
 		return nil, err
 	}
-	msg = MapToVoteMsg(msg_map)
+	msg = MapToVoteMsg(msg_map, msg.Type)
 	return msg, nil
 }
 
@@ -165,6 +166,6 @@ func MutateProposalMsg(msg *ConsensusMsg) (*ConsensusMsg, error) {
 	if err != nil {
 		return nil, err
 	}
-	msg = MapToProposalMsg(msg_map)
+	msg = MapToProposalMsg(msg_map, msg.Type)
 	return msg, nil
 }
