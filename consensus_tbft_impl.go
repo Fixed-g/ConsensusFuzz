@@ -405,8 +405,12 @@ func (consensus *ConsensusTBFTImpl) sendProposeState(isProposer bool) {
 	// TODO: mutate here (true / false)
 	// TODO: type = mutateType(msgbus.ProposeState);isProposer = mutateBool(isPoposer);
 	consensus.logger.Infof("fuzzing started")
-	new_isProposer := MutateBool(isProposer)
-	consensus.logger.Debugf("we mutate proposestate message in sendProposeState function and send it")
+	// new_isProposer := MutateBool(isProposer)
+	// consensus.logger.Debugf("we mutate proposestate message in sendProposeState function and send it")
+
+	new_isProposer := isProposer
+	consensus.logger.Debugf("we don't mutate proposestate message in sendProposeState function and send it")
+
 	consensus.msgbus.PublishSafe(msgbus.ProposeState, new_isProposer)
 }
 
@@ -1045,13 +1049,18 @@ func (consensus *ConsensusTBFTImpl) procPropose(proposal *tbftpb.Proposal) {
 	// Tell the consensus module to perform block validation
 	// TODO: type = mutateType(msgbus.VerifyBlock); block = mutateBlock(proposal.Block);
 	//consensus.logger.Infof("[mutate] block: %d to %d", isProposer, new_isProposer)
-	block, err := MutateBlock(proposal.Block)
-	if err != nil {
-		consensus.logger.Errorf(err.Error())
-		return
-	}
 
-	consensus.logger.Debugf("we mutate block message in procPropose function and send it")
+	// block, err := MutateBlock(proposal.Block)
+	// if err != nil {
+	// 	consensus.logger.Errorf(err.Error())
+	// 	return
+	// }
+
+	// consensus.logger.Debugf("we mutate block message in procPropose function and send it")
+
+	block := proposal.Block
+	consensus.logger.Debugf("we don't mutate block message in procPropose function and send it")
+
 	consensus.msgbus.PublishSafe(msgbus.VerifyBlock, block)
 
 	consensus.logger.Infof("[%s](%d/%d/%s) processed proposal (%d/%d/%x), time[verify:%dms]",
@@ -1374,13 +1383,18 @@ func (consensus *ConsensusTBFTImpl) commitBlock(block *common.Block, voteSet *tb
 	block.AdditionalData.ExtraData[TBFTAddtionalDataKey] = qc
 	// TODO: need mutate
 	// TODO: type = mutateType(msgbus.commitBlock); block = mutateBlock(block);
-	new_block, err := MutateBlock(block)
-	if err != nil {
-		consensus.logger.Errorf(err.Error())
-		return
-	}
 
-	consensus.logger.Debugf("we mutate CommitBlock message in commitBlock function and send it")
+	// new_block, err := MutateBlock(block)
+	// if err != nil {
+	// 	consensus.logger.Errorf(err.Error())
+	// 	return
+	// }
+
+	// consensus.logger.Debugf("we mutate CommitBlock message in commitBlock function and send it")
+
+	new_block := block
+	consensus.logger.Debugf("we don't mutate CommitBlock message in commitBlock function and send it")
+
 	consensus.msgbus.Publish(msgbus.CommitBlock, new_block)
 
 	consensus.logger.Infof("[%s](%d/%d/%s) consensus commit block (%d/%x), time[marshalQC:%dms]",
@@ -1564,13 +1578,17 @@ func (consensus *ConsensusTBFTImpl) delInvalidTxs(vs *VoteSet, hash []byte) {
 				consensus.Id, consensus.Height, consensus.Round, consensus.Step)
 			// TODO: need mutate
 			// TODO: type = mutateType(msgbus.RwSetVerifyFailTxs); payload = mutatePayload(payload);
-			new_payload, err := MutateTxs(payload)
-			if err != nil {
-				consensus.logger.Errorf(err.Error())
-				return
-			}
 
-			consensus.logger.Debugf("we mutate Txs message in delInvalidTxs function and send it")
+			// new_payload, err := MutateTxs(payload)
+			// if err != nil {
+			// 	consensus.logger.Errorf(err.Error())
+			// 	return
+			// }
+			// consensus.logger.Debugf("we mutate Txs message in delInvalidTxs function and send it")
+
+			new_payload := payload
+			consensus.logger.Debugf("we dont mutate Txs message in delInvalidTxs function and send it")
+
 			consensus.msgbus.PublishSafe(msgbus.RwSetVerifyFailTxs, new_payload)
 		}
 	}
@@ -2541,7 +2559,7 @@ func (consensus *ConsensusTBFTImpl) createConsensusMsgFromTBFTMsgBz(tbftMsgBz []
 				prevote.Voter, prevote.Height, prevote.Round, prevote.Hash, err,
 			)
 			//add panic
-			panic("verify prevote fail!")
+			// panic("verify prevote fail!")
 			return nil
 		}
 		return &ConsensusMsg{
@@ -2557,7 +2575,7 @@ func (consensus *ConsensusTBFTImpl) createConsensusMsgFromTBFTMsgBz(tbftMsgBz []
 				precommit.Voter, precommit.Height, precommit.Round, precommit.Hash, err,
 			)
 			//add panic
-			panic("verify precommit fail!")
+			// panic("verify precommit fail!")
 			return nil
 		}
 		return &ConsensusMsg{
