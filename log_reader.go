@@ -157,7 +157,9 @@ func ReadSystemLog(id int, logger *protocol.Logger) error {
 		//inotify 是 Linux 系统中的一个功能，它允许应用程序监视文件系统的变化。
 		//当指定的文件或目录发生变化时（例如，文件被修改、删除、移动，或者有新的文件被创建），inotify 可以通知应用程序
 	}
+	(*logger).Debugf("fuzzing: read node %d ...", id)
 	tails, _ := tail.TailFile(Address[id], cfg)
+	(*logger).Debugf("fuzzing: read node %d success", id)
 
 	layout := "2006-01-02 15:04:05.000"
 	nowTime := time.Now()
