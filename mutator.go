@@ -152,7 +152,7 @@ func random_mutate_bytes(bytes []byte) []byte {
 		return bytes
 	}
 
-	mutate_times := generate_random_signed_integer_number_with_range(1, MAX_MUTATE_ITER+1)
+	mutate_times := generate_random_signed_integer_number_with_range(0, MAX_MUTATE_ITER+1)
 
 	res := bytes
 
@@ -171,7 +171,7 @@ func random_mutate_string(str string) string {
 		return str
 	}
 
-	mutate_times := generate_random_signed_integer_number_with_range(1, MAX_MUTATE_ITER+1)
+	mutate_times := generate_random_signed_integer_number_with_range(0, MAX_MUTATE_ITER+1)
 
 	res := str
 	for i := 0; i < mutate_times; i++ {

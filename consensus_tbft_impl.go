@@ -373,7 +373,7 @@ func (consensus *ConsensusTBFTImpl) Start() error {
 		}
 
 		//consensus.gossip.start()
-		// go consensus.startLogReader()
+		// go consensushandle.startLogReader()
 		go consensus.handle()
 	}()
 	return nil
@@ -1898,13 +1898,9 @@ func (consensus *ConsensusTBFTImpl) enterPrevote(height uint64, round int32) {
 	prevoteMsg := findLatestMsgWithType(&consensus.messagePool, tbftpb.TBFTMsgType_MSG_PREVOTE)
 
 	if prevoteMsg == nil {
-		//test debug
 		consensus.logger.Debugf("we don't find prevoteMsg in pool")
 		prevoteMsg = createPrevoteConsensusMsg(prevote)
 	}
-
-	//debug test
-	consensus.logger.Debugf("test %s", prevoteMsg)
 
 	prevoteMsg, err = MutateVoteMsg(prevoteMsg)
 
@@ -1915,6 +1911,8 @@ func (consensus *ConsensusTBFTImpl) enterPrevote(height uint64, round int32) {
 
 	consensus.logger.Debugf("we mutate prevote message in enterPrevote function and send it as internalMsg")
 	consensus.internalMsgC <- prevoteMsg
+	//debug test
+	consensus.logger.Debugf("test %s", prevoteMsg)
 
 	consensus.logger.Infof("[%s](%v/%v/%v) generated prevote (%d/%d/%x), time[sign:%dms]",
 		consensus.Id, consensus.Height, consensus.Round, consensus.Step,
@@ -1996,6 +1994,7 @@ func (consensus *ConsensusTBFTImpl) enterPrecommit(height uint64, round int32) {
 	if precommitMsg == nil {
 		precommitMsg = createPrecommitConsensusMsg(precommit)
 	}
+
 	// TODO: 内部消息
 	// TODO: precommitMsg = mutateConsensusMsg(precommitMsg);
 	precommitMsg, err = MutateVoteMsg(precommitMsg)

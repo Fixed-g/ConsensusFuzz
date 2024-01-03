@@ -46,7 +46,7 @@ func MapToVoteMsg(m map[string]interface{}, t tbftpb.TBFTMsgType) *ConsensusMsg 
 	}
 	return &ConsensusMsg{
 		Type: tbftpb.TBFTMsgType(t),
-		Msg:  mustMarshal(vote),
+		Msg:  vote,
 	}
 }
 
@@ -58,7 +58,7 @@ func MapToProposalMsg(m map[string]interface{}, t tbftpb.TBFTMsgType) *Consensus
 	}
 	return &ConsensusMsg{
 		Type: tbftpb.TBFTMsgType(t),
-		Msg:  mustMarshal(proposal),
+		Msg:  proposal,
 	}
 }
 
