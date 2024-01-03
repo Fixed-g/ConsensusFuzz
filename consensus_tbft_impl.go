@@ -373,7 +373,7 @@ func (consensus *ConsensusTBFTImpl) Start() error {
 		}
 
 		//consensus.gossip.start()
-		go consensus.startLogReader()
+		// go consensus.startLogReader()
 		go consensus.handle()
 	}()
 	return nil
