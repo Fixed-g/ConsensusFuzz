@@ -67,13 +67,11 @@ func (consensus *ConsensusTBFTImpl) sendConsensusVote(vote *tbftpb.Vote, to stri
 		return
 	}
 	// TODO: mutate vote here
-	// new_vote, err := MutateVote(vote)
-	// if err != nil {
-	// 	consensus.logger.Errorf(err.Error())
-	// 	return
-	// }
-
-	new_vote := vote
+	new_vote, err := MutateVote(vote)
+	if err != nil {
+		consensus.logger.Errorf(err.Error())
+		return
+	}
 
 	var msg *tbftpb.TBFTMsg
 	switch vote.Type {
@@ -84,8 +82,8 @@ func (consensus *ConsensusTBFTImpl) sendConsensusVote(vote *tbftpb.Vote, to stri
 	}
 
 	consensus.logger.Infof("%s send consensus %s", consensus.Id, vote.String())
-	// consensus.logger.Debugf("we mutate vote message in sendConsensusVote function and send it ")
-	consensus.logger.Debugf("we dont mutate vote message in sendConsensusVote function and send it ")
+	consensus.logger.Debugf("we mutate vote message in sendConsensusVote function and send it ")
+	// consensus.logger.Debugf("we dont mutate vote message in sendConsensusVote function and send it ")
 
 	consensus.sendConsensusMsg(msg, to)
 }
