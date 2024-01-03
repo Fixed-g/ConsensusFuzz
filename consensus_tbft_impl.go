@@ -1895,21 +1895,25 @@ func (consensus *ConsensusTBFTImpl) enterPrevote(height uint64, round int32) {
 
 	// TODO: 发送给自己的内部消息
 	// TODO: prevoteMsg = mutateConsensusMsg(prevoteMsg);
-	prevoteMsg := findLatestMsgWithType(&consensus.messagePool, tbftpb.TBFTMsgType_MSG_PREVOTE)
+	// prevoteMsg := findLatestMsgWithType(&consensus.messagePool, tbftpb.TBFTMsgType_MSG_PREVOTE)
 
-	if prevoteMsg == nil {
-		consensus.logger.Debugf("we don't find prevoteMsg in pool")
-		prevoteMsg = createPrevoteConsensusMsg(prevote)
-	}
+	// if prevoteMsg == nil {
+	// 	consensus.logger.Debugf("we don't find prevoteMsg in pool")
+	// 	prevoteMsg = createPrevoteConsensusMsg(prevote)
+	// }
 
-	prevoteMsg, err = MutateVoteMsg(prevoteMsg)
+	// prevoteMsg, err = MutateVoteMsg(prevoteMsg)
 
-	if err != nil {
-		consensus.logger.Errorf(err.Error())
-		return
-	}
+	// if err != nil {
+	// 	consensus.logger.Errorf(err.Error())
+	// 	return
+	// }
 
-	consensus.logger.Debugf("we mutate prevote message in enterPrevote function and send it as internalMsg")
+	// consensus.logger.Debugf("we mutate prevote message in enterPrevote function and send it as internalMsg")
+
+	consensus.logger.Debugf("we don't mutate prevote message in enterPrevote function and send it as internalMsg")
+	prevoteMsg := createPrevoteConsensusMsg(prevote)
+
 	consensus.internalMsgC <- prevoteMsg
 	//debug test
 	consensus.logger.Debugf("test %s", prevoteMsg)
@@ -1989,21 +1993,25 @@ func (consensus *ConsensusTBFTImpl) enterPrecommit(height uint64, round int32) {
 	}
 	signPrecommitTime := CurrentTime()
 
-	precommitMsg := findLatestMsgWithType(&consensus.messagePool, tbftpb.TBFTMsgType_MSG_PRECOMMIT)
+	// precommitMsg := findLatestMsgWithType(&consensus.messagePool, tbftpb.TBFTMsgType_MSG_PRECOMMIT)
 
-	if precommitMsg == nil {
-		precommitMsg = createPrecommitConsensusMsg(precommit)
-	}
+	// if precommitMsg == nil {
+	// 	precommitMsg = createPrecommitConsensusMsg(precommit)
+	// }
 
-	// TODO: 内部消息
-	// TODO: precommitMsg = mutateConsensusMsg(precommitMsg);
-	precommitMsg, err = MutateVoteMsg(precommitMsg)
-	if err != nil {
-		consensus.logger.Errorf(err.Error())
-		return
-	}
+	// // TODO: 内部消息
+	// // TODO: precommitMsg = mutateConsensusMsg(precommitMsg);
+	// precommitMsg, err = MutateVoteMsg(precommitMsg)
+	// if err != nil {
+	// 	consensus.logger.Errorf(err.Error())
+	// 	return
+	// }
 
-	consensus.logger.Debugf("we mutate precommit message in enterPrecommit function and send it as internalMsg")
+	// consensus.logger.Debugf("we mutate precommit message in enterPrecommit function and send it as internalMsg")
+
+	consensus.logger.Debugf("we don't mutate precommit message in enterPrevote function and send it as internalMsg")
+	precommitMsg := createPrevoteConsensusMsg(precommit)
+
 	consensus.internalMsgC <- precommitMsg
 
 	consensus.logger.Infof("[%s](%v/%v/%v) generated precommit (%d/%d/%x), time[sign:%dms]",
@@ -2532,6 +2540,8 @@ func (consensus *ConsensusTBFTImpl) createConsensusMsgFromTBFTMsgBz(tbftMsgBz []
 				consensus.Id, consensus.Height, consensus.Round, consensus.Step,
 				prevote.Voter, prevote.Height, prevote.Round, prevote.Hash, err,
 			)
+			//add panic
+			panic("verify prevote fail!")
 			return nil
 		}
 		return &ConsensusMsg{
@@ -2546,6 +2556,8 @@ func (consensus *ConsensusTBFTImpl) createConsensusMsgFromTBFTMsgBz(tbftMsgBz []
 				consensus.Id, consensus.Height, consensus.Round, consensus.Step,
 				precommit.Voter, precommit.Height, precommit.Round, precommit.Hash, err,
 			)
+			//add panic
+			panic("verify precommit fail!")
 			return nil
 		}
 		return &ConsensusMsg{
@@ -2555,6 +2567,10 @@ func (consensus *ConsensusTBFTImpl) createConsensusMsgFromTBFTMsgBz(tbftMsgBz []
 	case tbftpb.TBFTMsgType_MSG_STATE:
 		state := new(tbftpb.GossipState)
 		mustUnmarshal(tbftMsg.Msg, state)
+
+		//add panic
+		panic("get state message")
+
 		return &ConsensusMsg{
 			Type: tbftMsg.Type,
 			Msg:  state,
