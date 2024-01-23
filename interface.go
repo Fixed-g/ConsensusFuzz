@@ -2,6 +2,7 @@ package tbft
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"chainmaker.org/chainmaker/pb-go/v2/common"
 	"chainmaker.org/chainmaker/pb-go/v2/consensus"
@@ -45,7 +46,8 @@ func MapToVoteMsg(m map[string]interface{}, t tbftpb.TBFTMsgType) *ConsensusMsg 
 		return nil
 	}
 	return &ConsensusMsg{
-		Type: tbftpb.TBFTMsgType(t),
+		// Type: tbftpb.TBFTMsgType(m["Type"].(tbftpb.TBFTMsgType)),
+		Type: t,
 		Msg:  vote,
 	}
 }
@@ -57,7 +59,8 @@ func MapToProposalMsg(m map[string]interface{}, t tbftpb.TBFTMsgType) *Consensus
 		return nil
 	}
 	return &ConsensusMsg{
-		Type: tbftpb.TBFTMsgType(t),
+		// Type: tbftpb.TBFTMsgType(m["Type"].(tbftpb.TBFTMsgType)),
+		Type: t,
 		Msg:  proposal,
 	}
 }
@@ -143,6 +146,7 @@ func MutateVoteMsg(msg *ConsensusMsg) (*ConsensusMsg, error) {
 
 	//debug test
 	// fmt.Println(msg_map)
+	fmt.Println(msg_map["Type"])
 
 	if err != nil {
 		return nil, err

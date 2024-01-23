@@ -42,33 +42,33 @@ func StructToMap(config interface{}) (map[string]interface{}, error) {
 		}
 		switch rv.Kind() {
 		case reflect.Int:
-			result[configField] = parseInt(rv)
+			result[configField] = rv.Interface()
 		case reflect.Int8:
-			result[configField] = parseInt8(rv)
+			result[configField] = rv.Interface()
 		case reflect.Int16:
-			result[configField] = parseInt16(rv)
+			result[configField] = rv.Interface()
 		case reflect.Int32:
-			result[configField] = parseInt32(rv)
+			result[configField] = rv.Interface()
 		case reflect.Int64:
-			result[configField] = parseInt64(rv)
+			result[configField] = rv.Interface()
 		case reflect.Uint:
-			result[configField] = parseUint(rv)
+			result[configField] = rv.Interface()
 		case reflect.Uint8:
-			result[configField] = parseUint8(rv)
+			result[configField] = rv.Interface()
 		case reflect.Uint16:
-			result[configField] = parseUint16(rv)
+			result[configField] = rv.Interface()
 		case reflect.Uint32:
-			result[configField] = parseUint32(rv)
+			result[configField] = rv.Interface()
 		case reflect.Uint64:
-			result[configField] = parseUint64(rv)
+			result[configField] = rv.Interface()
 		case reflect.Float32:
-			result[configField] = parseFloat32(rv)
+			result[configField] = rv.Interface()
 		case reflect.Float64:
-			result[configField] = parseFloat64(rv)
+			result[configField] = rv.Interface()
 		case reflect.String:
-			result[configField] = parseString(rv)
+			result[configField] = rv.Interface()
 		case reflect.Bool:
-			result[configField] = parseBool(rv)
+			result[configField] = rv.Interface()
 		case reflect.Ptr:
 			v, err := parsePtr(rv)
 			if err != nil {
@@ -112,61 +112,61 @@ func StructToMap(config interface{}) (map[string]interface{}, error) {
 	return result, nil
 }
 
-func parseInt(value reflect.Value) int {
-	return int(value.Int())
-}
+// func parseInt(value reflect.Value) int {
+// 	return int(value.Int())
+// }
 
-func parseInt8(value reflect.Value) int8 {
-	return int8(value.Int())
-}
+// func parseInt8(value reflect.Value) int8 {
+// 	return int8(value.Int())
+// }
 
-func parseInt16(value reflect.Value) int16 {
-	return int16(value.Int())
-}
+// func parseInt16(value reflect.Value) int16 {
+// 	return int16(value.Int())
+// }
 
-func parseInt32(value reflect.Value) int32 {
-	return int32(value.Int())
-}
+// func parseInt32(value reflect.Value) int32 {
+// 	return int32(value.Int())
+// }
 
-func parseInt64(value reflect.Value) int64 {
-	return value.Int()
-}
+// func parseInt64(value reflect.Value) int64 {
+// 	return value.Int()
+// }
 
-func parseUint(value reflect.Value) uint {
-	return uint(value.Uint())
-}
+// func parseUint(value reflect.Value) uint {
+// 	return uint(value.Uint())
+// }
 
-func parseUint8(value reflect.Value) uint8 {
-	return uint8(value.Uint())
-}
+// func parseUint8(value reflect.Value) uint8 {
+// 	return uint8(value.Uint())
+// }
 
-func parseUint16(value reflect.Value) uint16 {
-	return uint16(value.Uint())
-}
+// func parseUint16(value reflect.Value) uint16 {
+// 	return uint16(value.Uint())
+// }
 
-func parseUint32(value reflect.Value) uint32 {
-	return uint32(value.Uint())
-}
+// func parseUint32(value reflect.Value) uint32 {
+// 	return uint32(value.Uint())
+// }
 
-func parseUint64(value reflect.Value) uint64 {
-	return value.Uint()
-}
+// func parseUint64(value reflect.Value) uint64 {
+// 	return value.Uint()
+// }
 
-func parseString(value reflect.Value) string {
-	return value.String()
-}
+// func parseString(value reflect.Value) string {
+// 	return value.String()
+// }
 
-func parseFloat32(value reflect.Value) float32 {
-	return float32(value.Float())
-}
+// func parseFloat32(value reflect.Value) float32 {
+// 	return float32(value.Float())
+// }
 
-func parseFloat64(value reflect.Value) float64 {
-	return value.Float()
-}
+// func parseFloat64(value reflect.Value) float64 {
+// 	return value.Float()
+// }
 
-func parseBool(value reflect.Value) bool {
-	return value.Bool()
-}
+// func parseBool(value reflect.Value) bool {
+// 	return value.Bool()
+// }
 
 func parsePtr(v reflect.Value) (map[string]interface{}, error) {
 	if v.IsNil() {
@@ -205,33 +205,33 @@ func parseSlice(v reflect.Value) ([]interface{}, error) {
 	for i := 0; i < v.Len(); i++ {
 		switch v.Index(i).Type().Kind() {
 		case reflect.Int:
-			res[i] = parseInt(v.Index(i))
+			res[i] = v.Index(i).Interface()
 		case reflect.Int8:
-			res[i] = parseInt8(v.Index(i))
+			res[i] = v.Index(i).Interface()
 		case reflect.Int16:
-			res[i] = parseInt16(v.Index(i))
+			res[i] = v.Index(i).Interface()
 		case reflect.Int32:
-			res[i] = parseInt32(v.Index(i))
+			res[i] = v.Index(i).Interface()
 		case reflect.Int64:
-			res[i] = parseInt64(v.Index(i))
+			res[i] = v.Index(i).Interface()
 		case reflect.Uint:
-			res[i] = parseUint(v.Index(i))
+			res[i] = v.Index(i).Interface()
 		case reflect.Uint8:
-			res[i] = parseUint8(v.Index(i))
+			res[i] = v.Index(i).Interface()
 		case reflect.Uint16:
-			res[i] = parseUint16(v.Index(i))
+			res[i] = v.Index(i).Interface()
 		case reflect.Uint32:
-			res[i] = parseUint32(v.Index(i))
+			res[i] = v.Index(i).Interface()
 		case reflect.Uint64:
-			res[i] = parseUint64(v.Index(i))
+			res[i] = v.Index(i).Interface()
 		case reflect.Float32:
-			res[i] = parseFloat32(v.Index(i))
+			res[i] = v.Index(i).Interface()
 		case reflect.Float64:
-			res[i] = parseFloat64(v.Index(i))
+			res[i] = v.Index(i).Interface()
 		case reflect.String:
-			res[i] = parseString(v.Index(i))
+			res[i] = v.Index(i).Interface()
 		case reflect.Bool:
-			res[i] = parseBool(v.Index(i))
+			res[i] = v.Index(i).Interface()
 		case reflect.Ptr:
 			value, err := parsePtr(v.Index(i))
 			if err != nil {

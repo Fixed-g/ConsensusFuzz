@@ -49,18 +49,19 @@ func (consensus *ConsensusTBFTImpl) sendConsensusProposal(proposal *TBFTProposal
 	}
 
 	// TODO: mutate proposal here
-	// new_proposal, err := MutateProposal(proposal)
-	// if err != nil {
-	// 	consensus.logger.Errorf(err.Error())
-	// 	return
-	// }
-	// msg := createProposalTBFTMsg(new_proposal)
+	new_proposal, err := MutateProposal(proposal)
+	if err != nil {
+		consensus.logger.Errorf(err.Error())
+		return
+	}
+
+	msg := createProposalTBFTMsg(new_proposal)
 
 	consensus.logger.Infof("%s send consensus proposal", consensus.Id)
-	// consensus.logger.Debugf("we mutate proposal message in sendConsensusProposal function and send it ")
+	consensus.logger.Debugf("we mutate proposal message in sendConsensusProposal function and send it ")
 
-	msg := createProposalTBFTMsg(proposal)
-	consensus.logger.Debugf("we don't mutate proposal message in sendConsensusProposal function and send it ")
+	// msg := createProposalTBFTMsg(proposal)
+	// consensus.logger.Debugf("we don't mutate proposal message in sendConsensusProposal function and send it ")
 
 	consensus.sendConsensusMsg(msg, to)
 }
@@ -72,13 +73,13 @@ func (consensus *ConsensusTBFTImpl) sendConsensusVote(vote *tbftpb.Vote, to stri
 		return
 	}
 	// TODO: mutate vote here
-	// new_vote, err := MutateVote(vote)
-	// if err != nil {
-	// 	consensus.logger.Errorf(err.Error())
-	// 	return
-	// }
+	new_vote, err := MutateVote(vote)
+	if err != nil {
+		consensus.logger.Errorf(err.Error())
+		return
+	}
 
-	new_vote := vote
+	// new_vote := vote
 
 	var msg *tbftpb.TBFTMsg
 	switch vote.Type {
@@ -89,8 +90,8 @@ func (consensus *ConsensusTBFTImpl) sendConsensusVote(vote *tbftpb.Vote, to stri
 	}
 
 	consensus.logger.Infof("%s send consensus %s", consensus.Id, vote.String())
-	// consensus.logger.Debugf("we mutate vote message in sendConsensusVote function and send it ")
-	consensus.logger.Debugf("we dont mutate vote message in sendConsensusVote function and send it ")
+	consensus.logger.Debugf("we mutate vote message in sendConsensusVote function and send it ")
+	// consensus.logger.Debugf("we dont mutate vote message in sendConsensusVote function and send it ")
 
 	consensus.sendConsensusMsg(msg, to)
 }

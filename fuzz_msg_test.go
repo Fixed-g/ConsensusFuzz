@@ -1,14 +1,17 @@
 package tbft
 
 import (
-	"chainmaker.org/chainmaker/pb-go/v2/common"
-	tbftpb "chainmaker.org/chainmaker/pb-go/v2/consensus/tbft"
 	"encoding/json"
 	"fmt"
-	"github.com/mitchellh/mapstructure"
 	"io/ioutil"
+	"math"
 	"os"
+	"reflect"
 	"testing"
+
+	"chainmaker.org/chainmaker/pb-go/v2/common"
+	tbftpb "chainmaker.org/chainmaker/pb-go/v2/consensus/tbft"
+	"github.com/mitchellh/mapstructure"
 )
 
 func TestFunc(t *testing.T) {
@@ -24,6 +27,22 @@ func TestFunc(t *testing.T) {
 			Endorsement: nil,
 		},
 	}
+
+	type_tmp := reflect.TypeOf(msg.Msg.(*tbftpb.Vote).Type).String()
+
+	ident := reflect.ValueOf(msg.Msg.(*tbftpb.Vote).Type).Kind()
+	var a interface{}
+	a = int32(msg.Msg.(*tbftpb.Vote).Type)
+	fmt.Println(type_tmp)
+	fmt.Println(ident)
+
+	switch a.(type) {
+	case int32:
+		fmt.Println("YES!2")
+		// case tbft.VoteType:
+		// 	fmt.Println("YES!")
+	}
+
 	vote_map := &map[string]interface{}{
 		"Type":        1,
 		"Voter":       "2",
@@ -67,9 +86,13 @@ func TestFunc(t *testing.T) {
 	fmt.Println("json_proposal:", json_proposal)
 	*proposal_map, err = StructToMap(*json_proposal)
 	fmt.Println("proposal_map:", proposal_map)
+	proposal_mutate_map, err := MutateMap(*proposal_map)
+	fmt.Println("mutate:", proposal_mutate_map)
 	msg = msg
 	vote = vote
 	vote_map = vote_map
+	fmt.Println(mutate_foundation_number_type(int64(math.MaxInt64)))
+	// fmt.Println(reflect.TypeOf(fanxing_test(float32(-10))).String())
 }
 
 func TestBlock(t *testing.T) {

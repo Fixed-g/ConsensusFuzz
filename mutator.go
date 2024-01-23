@@ -7,7 +7,14 @@ import (
 	"math/rand"
 	"reflect"
 	"time"
+
+	"chainmaker.org/chainmaker/pb-go/v2/common"
+	tbftpb "chainmaker.org/chainmaker/pb-go/v2/consensus/tbft"
 )
+
+type Numeric interface {
+	int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64 | float32 | float64
+}
 
 var MAX_MUTATE_ITER = 5
 
@@ -46,40 +53,9 @@ func generate_edge_value_with_type(number interface{}) (interface{}, interface{}
 	case float64:
 		return float64(-math.MaxFloat64), float64(math.MaxFloat64)
 	default:
-		fmt.Println("It's not a number type!")
+		fmt.Printf("%s is an unknown number type!\n", reflect.TypeOf(number).String())
 		return false, false
 	}
-}
-
-func edge_value_mutate_with_type(number interface{}) interface{} {
-	minNumber, maxNumber := generate_edge_value_with_type(number)
-	randChoice := Generate_random_bool()
-	switch randChoice {
-	case false:
-		return minNumber
-	case true:
-		return maxNumber
-	default:
-		return 0
-	}
-}
-
-func strictly_increasing_generate_random_number_with_type(number interface{}) interface{} {
-	_, maxNumber := generate_edge_value_with_type(number)
-	return generate_random_number_with_range(number, maxNumber)
-}
-
-func strictly_decreasing_generate_random_number_with_type(number interface{}) interface{} {
-	minNumber, _ := generate_edge_value_with_type(number)
-	return generate_random_number_with_range(minNumber, number)
-}
-
-func generate_random_number_with_type(number interface{}) interface{} {
-	minNumber, maxNumber := generate_edge_value_with_type(number)
-	if _, ok := minNumber.(int64); ok {
-		return generate_random_signed_long_integer_number_with_range(minNumber.(int64), maxNumber.(int64))
-	}
-	return generate_random_number_with_range(minNumber, maxNumber)
 }
 
 func generate_random_number_with_range(lower interface{}, upper interface{}) interface{} {
@@ -109,7 +85,7 @@ func generate_random_number_with_range(lower interface{}, upper interface{}) int
 	case float64:
 		return generate_random_float64_number_with_range(lower.(float64), upper.(float64))
 	default:
-		fmt.Println("It's not a number type!")
+		fmt.Printf("%s is an unknown number type!\n", reflect.TypeOf(lower).String())
 		return false
 	}
 }
@@ -144,6 +120,127 @@ func generate_random_unsigned_integer_number_with_range(min, max uint64) uint64 
 	return x + min
 }
 
+func generate_random_number_with_type(number interface{}) interface{} {
+	minNumber, maxNumber := generate_edge_value_with_type(number)
+	return generate_random_number_with_range(minNumber, maxNumber)
+}
+
+func edge_value_mutate_with_type(number interface{}) interface{} {
+	minNumber, maxNumber := generate_edge_value_with_type(number)
+	randChoice := Generate_random_bool()
+	switch randChoice {
+	case false:
+		return minNumber
+	case true:
+		return maxNumber
+	default:
+		return 0
+	}
+}
+
+func generate_random_enum(enumValueMap map[string]int32) int32 {
+	var enumRandomPool []int32
+	for _, value := range enumValueMap {
+		enumRandomPool = append(enumRandomPool, value)
+	}
+
+	return enumRandomPool[seededRand.Intn(len(enumRandomPool))]
+}
+
+// func strictly_increasing_generate_random_number_with_type(number interface{}) interface{} {
+// 	_, maxNumber := generate_edge_value_with_type(number)
+// 	return generate_random_number_with_range(number, maxNumber)
+// }
+
+// func strictly_decreasing_generate_random_number_with_type(number interface{}) interface{} {
+// 	minNumber, _ := generate_edge_value_with_type(number)
+// 	return generate_random_number_with_range(minNumber, number)
+// }
+
+func small_change_fundation_number[T Numeric](number T) T {
+	changeRange := seededRand.Intn(5) + 1
+	randChoice := Generate_random_bool()
+
+	minNumber, maxNumber := generate_edge_value_with_type(number)
+
+	if randChoice {
+		if number > maxNumber.(T)-T(changeRange) {
+			return maxNumber.(T)
+		}
+		return number + T(changeRange)
+	}
+	if number < minNumber.(T)+T(changeRange) {
+		return minNumber.(T)
+	}
+	return number - T(changeRange)
+}
+
+func mutate_foundation_number_type[T Numeric](number T) T {
+	randChoice := seededRand.Intn(100)
+	if randChoice < 10 {
+		return edge_value_mutate_with_type(number).(T)
+	} else if randChoice < 90 {
+		return T(small_change_fundation_number(number))
+	} else {
+		return generate_random_number_with_type(number).(T)
+	}
+}
+
+func mutate_other_number_type(number interface{}) interface{} {
+	switch number.(type) {
+	case tbftpb.TBFTMsgType:
+		return tbftpb.TBFTMsgType(generate_random_enum(tbftpb.TBFTMsgType_value))
+	case tbftpb.VoteType:
+		return tbftpb.VoteType(generate_random_enum(tbftpb.VoteType_value))
+	case common.TxType:
+		return common.TxType(generate_random_enum(common.TxType_value))
+	default:
+		// fmt.Printf("unknow number data type %s\n", reflect.TypeOf(number).String())
+		return number
+	}
+}
+
+func handle_number_mutate(number interface{}) (interface{}, error) {
+	reflect.TypeOf(number)
+	switch number := number.(type) {
+	case uint:
+		return mutate_foundation_number_type(number), nil
+	case uint8:
+		return mutate_foundation_number_type(number), nil
+	case uint16:
+		return mutate_foundation_number_type(number), nil
+	case uint32:
+		return mutate_foundation_number_type(number), nil
+	case uint64:
+		return mutate_foundation_number_type(number), nil
+	case int:
+		return mutate_foundation_number_type(number), nil
+	case int8:
+		return mutate_foundation_number_type(number), nil
+	case int16:
+		return mutate_foundation_number_type(number), nil
+	case int32:
+		return mutate_foundation_number_type(number), nil
+	case int64:
+		return mutate_foundation_number_type(number), nil
+	case float32:
+		return mutate_foundation_number_type(number), nil
+	case float64:
+		return mutate_foundation_number_type(number), nil
+	default:
+		return mutate_other_number_type(number), nil
+	}
+}
+
+func handle_bytes_mutate(bytes []byte, name string) []byte {
+	switch name {
+	case "MemberInfo":
+		return bytes
+	default:
+		return random_mutate_bytes(bytes)
+	}
+}
+
 /* random mutation for bytes */
 func random_mutate_bytes(bytes []byte) []byte {
 	length := len(bytes)
@@ -161,6 +258,15 @@ func random_mutate_bytes(bytes []byte) []byte {
 		res[pos] = byte(generate_random_unsigned_integer_number_with_range(0, math.MaxUint8))
 	}
 	return res
+}
+
+func handle_string_mutate(str string, name string) string {
+	switch name {
+	case "Voter":
+		return str
+	default:
+		return random_mutate_string(str)
+	}
 }
 
 /* random mutation for string */
@@ -181,7 +287,7 @@ func random_mutate_string(str string) string {
 	return res
 }
 
-func handleSlice(v reflect.Value) ([]interface{}, error) {
+func handleSlice(v reflect.Value, name string) ([]interface{}, error) {
 	if v.Type().Kind() != reflect.Slice {
 		return nil, errors.New("incorrect config type: config type should be slice")
 	}
@@ -198,7 +304,7 @@ func handleSlice(v reflect.Value) ([]interface{}, error) {
 		for i := 0; i < v.Len(); i++ {
 			value[i] = uint8(v.Index(i).Uint())
 		}
-		value = random_mutate_bytes(value)
+		value = handle_bytes_mutate(value, name)
 		for i := 0; i < len(value); i++ {
 			res[i] = value[i]
 		}
@@ -224,7 +330,7 @@ func handleSlice(v reflect.Value) ([]interface{}, error) {
 				for i := 0; i < v.Len(); i++ {
 					value[i] = v.Index(i).Interface().(uint8)
 				}
-				value = random_mutate_bytes(value)
+				value = handle_bytes_mutate(value, name)
 				for i := 0; i < len(value); i++ {
 					res[i] = value[i]
 				}
@@ -248,36 +354,14 @@ func MutateMap(input map[string]interface{}) (map[string]interface{}, error) {
 	for k, value := range input {
 		ident := reflect.ValueOf(value).Kind()
 		switch ident {
-		case reflect.Int:
-			input[k] = generate_random_number_with_type(value)
-		case reflect.Int8:
-			input[k] = generate_random_number_with_type(value)
-		case reflect.Int16:
-			input[k] = generate_random_number_with_type(value)
-		case reflect.Int32:
-			input[k] = generate_random_number_with_type(value)
-		case reflect.Int64:
-			input[k] = generate_random_number_with_type(value)
-		case reflect.Uint:
-			input[k] = generate_random_number_with_type(value)
-		case reflect.Uint8:
-			input[k] = generate_random_number_with_type(value)
-		case reflect.Uint16:
-			input[k] = generate_random_number_with_type(value)
-		case reflect.Uint32:
-			input[k] = generate_random_number_with_type(value)
-		case reflect.Uint64:
-			input[k] = generate_random_number_with_type(value)
-		case reflect.Float32:
-			input[k] = generate_random_number_with_type(value)
-		case reflect.Float64:
-			input[k] = generate_random_number_with_type(value)
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Float32, reflect.Float64:
+			input[k], err = handle_number_mutate(value)
 		case reflect.Bool:
 			input[k] = Generate_random_bool()
 		case reflect.String:
-			input[k] = random_mutate_string(value.(string))
+			input[k] = handle_string_mutate(value.(string), k)
 		case reflect.Slice:
-			input[k], err = handleSlice(reflect.ValueOf(value))
+			input[k], err = handleSlice(reflect.ValueOf(value), k)
 			if err != nil {
 				fmt.Println(err)
 			}

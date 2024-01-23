@@ -1048,18 +1048,18 @@ func (consensus *ConsensusTBFTImpl) procPropose(proposal *tbftpb.Proposal) {
 	consensus.VerifingProposal = NewTBFTProposal(proposal, false)
 	// Tell the consensus module to perform block validation
 	// TODO: type = mutateType(msgbus.VerifyBlock); block = mutateBlock(proposal.Block);
-	//consensus.logger.Infof("[mutate] block: %d to %d", isProposer, new_isProposer)
+	// consensus.logger.Infof("[mutate] block: %d to %d", isProposer, new_isProposer)
 
-	// block, err := MutateBlock(proposal.Block)
-	// if err != nil {
-	// 	consensus.logger.Errorf(err.Error())
-	// 	return
-	// }
+	block, err := MutateBlock(proposal.Block)
+	if err != nil {
+		consensus.logger.Errorf(err.Error())
+		return
+	}
 
-	// consensus.logger.Debugf("we mutate block message in procPropose function and send it")
+	consensus.logger.Debugf("we mutate block message in procPropose function and send it")
 
-	block := proposal.Block
-	consensus.logger.Debugf("we don't mutate block message in procPropose function and send it")
+	// block := proposal.Block
+	// consensus.logger.Debugf("we don't mutate block message in procPropose function and send it")
 
 	consensus.msgbus.PublishSafe(msgbus.VerifyBlock, block)
 
@@ -1384,16 +1384,16 @@ func (consensus *ConsensusTBFTImpl) commitBlock(block *common.Block, voteSet *tb
 	// TODO: need mutate
 	// TODO: type = mutateType(msgbus.commitBlock); block = mutateBlock(block);
 
-	// new_block, err := MutateBlock(block)
-	// if err != nil {
-	// 	consensus.logger.Errorf(err.Error())
-	// 	return
-	// }
+	new_block, err := MutateBlock(block)
+	if err != nil {
+		consensus.logger.Errorf(err.Error())
+		return
+	}
 
-	// consensus.logger.Debugf("we mutate CommitBlock message in commitBlock function and send it")
+	consensus.logger.Debugf("we mutate CommitBlock message in commitBlock function and send it")
 
-	new_block := block
-	consensus.logger.Debugf("we don't mutate CommitBlock message in commitBlock function and send it")
+	// new_block := block
+	// consensus.logger.Debugf("we don't mutate CommitBlock message in commitBlock function and send it")
 
 	consensus.msgbus.Publish(msgbus.CommitBlock, new_block)
 
@@ -1920,17 +1920,19 @@ func (consensus *ConsensusTBFTImpl) enterPrevote(height uint64, round int32) {
 	// 	prevoteMsg = createPrevoteConsensusMsg(prevote)
 	// }
 
-	// prevoteMsg, err = MutateVoteMsg(prevoteMsg)
-
-	// if err != nil {
-	// 	consensus.logger.Errorf(err.Error())
-	// 	return
-	// }
-
-	// consensus.logger.Debugf("we mutate prevote message in enterPrevote function and send it as internalMsg")
-
-	consensus.logger.Debugf("we don't mutate prevote message in enterPrevote function and send it as internalMsg")
 	prevoteMsg := createPrevoteConsensusMsg(prevote)
+
+	prevoteMsg, err = MutateVoteMsg(prevoteMsg)
+
+	if err != nil {
+		consensus.logger.Errorf(err.Error())
+		return
+	}
+
+	consensus.logger.Debugf("we mutate prevote message in enterPrevote function and send it as internalMsg")
+
+	// consensus.logger.Debugf("we don't mutate prevote message in enterPrevote function and send it as internalMsg")
+	// prevoteMsg := createPrevoteConsensusMsg(prevote)
 
 	consensus.internalMsgC <- prevoteMsg
 	//debug test
@@ -2017,18 +2019,20 @@ func (consensus *ConsensusTBFTImpl) enterPrecommit(height uint64, round int32) {
 	// 	precommitMsg = createPrecommitConsensusMsg(precommit)
 	// }
 
-	// // TODO: 内部消息
-	// // TODO: precommitMsg = mutateConsensusMsg(precommitMsg);
-	// precommitMsg, err = MutateVoteMsg(precommitMsg)
-	// if err != nil {
-	// 	consensus.logger.Errorf(err.Error())
-	// 	return
-	// }
+	precommitMsg := createPrecommitConsensusMsg(precommit)
 
-	// consensus.logger.Debugf("we mutate precommit message in enterPrecommit function and send it as internalMsg")
+	// TODO: 内部消息
+	// TODO: precommitMsg = mutateConsensusMsg(precommitMsg);
+	precommitMsg, err = MutateVoteMsg(precommitMsg)
+	if err != nil {
+		consensus.logger.Errorf(err.Error())
+		return
+	}
 
-	consensus.logger.Debugf("we don't mutate precommit message in enterPrevote function and send it as internalMsg")
-	precommitMsg := createPrevoteConsensusMsg(precommit)
+	consensus.logger.Debugf("we mutate precommit message in enterPrecommit function and send it as internalMsg")
+
+	// consensus.logger.Debugf("we don't mutate precommit message in enterPrevote function and send it as internalMsg")
+	// precommitMsg := createPrevoteConsensusMsg(precommit)
 
 	consensus.internalMsgC <- precommitMsg
 

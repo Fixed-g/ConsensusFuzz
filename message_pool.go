@@ -1,8 +1,6 @@
 package tbft
 
 import (
-	"fmt"
-
 	tbftpb "chainmaker.org/chainmaker/pb-go/v2/consensus/tbft"
 )
 
@@ -30,8 +28,6 @@ func newMessagePool(cap int, msgs []*ConsensusMsg) *MessagePool {
 
 // add consensus message to message pool
 func addMsgToPool(messagePool *MessagePool, message *ConsensusMsg) *MessagePool {
-	fmt.Printf("add %s message to pool;\n", message.Type.String())
-
 	if _, ok := messagePool.pool[message.Type.String()]; !ok {
 		queue_tmp := &MessageQueue{
 			messages: make([]*ConsensusMsg, 0),
