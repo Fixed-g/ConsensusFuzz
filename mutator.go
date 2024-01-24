@@ -201,6 +201,10 @@ func mutate_other_number_type(number interface{}) interface{} {
 }
 
 func handle_number_mutate(number interface{}) (interface{}, error) {
+	if seededRand.Intn(100) < 80 {
+		return number, nil
+	}
+
 	reflect.TypeOf(number)
 	switch number := number.(type) {
 	case uint:
@@ -233,6 +237,10 @@ func handle_number_mutate(number interface{}) (interface{}, error) {
 }
 
 func handle_bytes_mutate(bytes []byte, name string) []byte {
+	if seededRand.Intn(100) < 80 {
+		return bytes
+	}
+
 	switch name {
 	case "MemberInfo":
 		return bytes
@@ -261,6 +269,10 @@ func random_mutate_bytes(bytes []byte) []byte {
 }
 
 func handle_string_mutate(str string, name string) string {
+	if seededRand.Intn(100) < 80 {
+		return str
+	}
+
 	switch name {
 	case "Voter":
 		return str
@@ -288,10 +300,6 @@ func random_mutate_string(str string) string {
 }
 
 func handleSlice(v reflect.Value, name string) ([]interface{}, error) {
-	// if seededRand.Intn(100) < 80 {
-	// 	return v.Interface().([]interface{}), nil
-	// }
-
 	if v.Type().Kind() != reflect.Slice {
 		return nil, errors.New("incorrect config type: config type should be slice")
 	}
