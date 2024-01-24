@@ -2,7 +2,6 @@ package tbft
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"chainmaker.org/chainmaker/pb-go/v2/common"
 	"chainmaker.org/chainmaker/pb-go/v2/consensus"
@@ -143,10 +142,6 @@ func MutateVoteMsg(msg *ConsensusMsg) (*ConsensusMsg, error) {
 	var err error
 	var msg_map map[string]interface{}
 	msg_map, err = StructToMap(*msg)
-
-	//debug test
-	// fmt.Println(msg_map)
-	fmt.Println(msg_map["Type"])
 
 	if err != nil {
 		return nil, err

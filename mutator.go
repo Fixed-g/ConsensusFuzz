@@ -288,6 +288,10 @@ func random_mutate_string(str string) string {
 }
 
 func handleSlice(v reflect.Value, name string) ([]interface{}, error) {
+	// if seededRand.Intn(100) < 80 {
+	// 	return v.Interface().([]interface{}), nil
+	// }
+
 	if v.Type().Kind() != reflect.Slice {
 		return nil, errors.New("incorrect config type: config type should be slice")
 	}
@@ -298,11 +302,11 @@ func handleSlice(v reflect.Value, name string) ([]interface{}, error) {
 
 	res := make([]interface{}, v.Len())
 
-	switch v.Index(0).Type().Kind() {
+	switch reflect.ValueOf(v.Index(0).Interface()).Kind() {
 	case reflect.Uint8:
 		value := make([]byte, v.Len())
 		for i := 0; i < v.Len(); i++ {
-			value[i] = uint8(v.Index(i).Uint())
+			value[i] = uint8(v.Index(i).Interface().(uint8))
 		}
 		value = handle_bytes_mutate(value, name)
 		for i := 0; i < len(value); i++ {
@@ -316,29 +320,33 @@ func handleSlice(v reflect.Value, name string) ([]interface{}, error) {
 			}
 			res[i] = value
 		}
-	case reflect.Interface:
+	case reflect.String:
 		for i := 0; i < v.Len(); i++ {
-			switch v.Index(i).Interface().(type) {
-			case map[string]interface{}:
-				value, err := MutateMap(v.Index(i).Interface().(map[string]interface{}))
-				if err != nil {
-					return nil, err
-				}
-				res[i] = value
-			case byte:
-				value := make([]byte, v.Len())
-				for i := 0; i < v.Len(); i++ {
-					value[i] = v.Index(i).Interface().(uint8)
-				}
-				value = handle_bytes_mutate(value, name)
-				for i := 0; i < len(value); i++ {
-					res[i] = value[i]
-				}
-			default:
-				errMsg := fmt.Sprintf("unknow data type %s\n", v.Index(0).Type().Kind().String())
-				return nil, errors.New(errMsg)
-			}
+			res[i] = handle_string_mutate(v.Index(i).Interface().(string), name)
 		}
+	// case reflect.Interface:
+	// 	for i := 0; i < v.Len(); i++ {
+	// 		switch v.Index(i).Interface().(type) {
+	// 		case map[string]interface{}:
+	// 			value, err := MutateMap(v.Index(i).Interface().(map[string]interface{}))
+	// 			if err != nil {
+	// 				return nil, err
+	// 			}
+	// 			res[i] = value
+	// 		case byte:
+	// 			value := make([]byte, v.Len())
+	// 			for i := 0; i < v.Len(); i++ {
+	// 				value[i] = v.Index(i).Interface().(uint8)
+	// 			}
+	// 			value = handle_bytes_mutate(value, name)
+	// 			for i := 0; i < len(value); i++ {
+	// 				res[i] = value[i]
+	// 			}
+	// 		default:
+	// 			errMsg := fmt.Sprintf("unknow data type %s\n", v.Index(0).Type().Kind().String())
+	// 			return nil, errors.New(errMsg)
+	// 		}
+	// 	}
 	default:
 		errMsg := fmt.Sprintf("unknow data type %s\n", v.Index(0).Type().Kind().String())
 		return nil, errors.New(errMsg)
