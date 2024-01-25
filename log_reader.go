@@ -206,6 +206,11 @@ func ReadSystemLog(id int, logger *protocol.Logger) error {
 		if err != nil || t.Before(nowTime) {
 			continue
 		}
+		n := LastState(id)
+		if GetLen(id) != 1 && t.After(LastState(id).time.Add(time.Minute*5)) { // 5min 内未更新状态
+			(*logger).Errorf("fuzzing: Delayed state: node: %d after %s", id, n.ToString())
+			StateLists[id][GetLen(id)-1].time = t
+		}
 		level := parts[1]
 		message := strings.Join(parts[3:], " ")
 		// 解析日志级别
@@ -213,7 +218,6 @@ func ReadSystemLog(id int, logger *protocol.Logger) error {
 			//处理日志,将错误日志打印出来,并找到匹配的对象加入corpors
 			(*logger).Infof("fuzzing: Error occurred:%s", message)
 		} else {
-			n := LastState(id)
 			var height, round int
 			var step string
 			parts = strings.Split(message, " ")
@@ -233,7 +237,7 @@ func ReadSystemLog(id int, logger *protocol.Logger) error {
 				height, _ = strconv.Atoi(parts[0])
 				round, _ = strconv.Atoi(parts[1])
 				step = "NEW_ROUND"
-				if uint64(height) != n.Height || int32(round) != 0 && int32(round) != n.Round+1 || (n.Step != "PROPOSE" && n.Step != "PREVOTE" && n.Step != "PRECOMMIT" && n.Step != "NEW_HEIGHT") {
+				if uint64(height) != n.Height || int32(round) != 0 && int32(round) != n.Round+1 || (n.Step != "PROPOSE" && n.Step != "PREVOTE" && n.Step != "PRECOMMIT" && n.Step != "NEW_HEIGHT" && n.Step != "COMMIT") {
 					(*logger).Errorf("fuzzing: Wrong state: node:%d [%d/%d/%s] after %s", id, height, round, step, n.ToString())
 				}
 			} else if strings.Contains(message, "attempt enterPropose to") {
@@ -279,16 +283,22 @@ func ReadSystemLog(id int, logger *protocol.Logger) error {
 			} else {
 				continue
 			}
-			n = NodeState{
+			newN := NodeState{
 				time:   t,
 				Height: uint64(height),
 				Round:  int32(round),
 				Step:   step,
 			}
-			if n.time.After(LastState(id).time.Add(time.Minute * 5)) {
-				(*logger).Errorf("fuzzing: Delayed state: node: %d [%d/%d/%s] after %s", id, height, round, step, n.ToString())
+			StateLists[id] = append(StateLists[id], newN)
+			for i := 1; i < 5; i++ {
+				if i == id || GetLen(i) < GetLen(id) {
+					continue
+				}
+				ni := LastState(i)
+				if !n.Equals(ni) {
+					(*logger).Errorf("fuzzing: Diff state history: node: %d [%d/%d/%s] with node %d: %s", id, height, round, step, i, ni.ToString())
+				}
 			}
-			StateLists[id] = append(StateLists[id], n)
 		}
 	}
 	return nil
