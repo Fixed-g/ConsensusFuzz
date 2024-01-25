@@ -52,13 +52,13 @@ func TestReadSynSystemLog(t *testing.T) {
 			parts = strings.Split(message, " ")
 			if strings.Contains(message, "attempt enter new height to") {
 				str := parts[len(parts)-1]
-				str = str[1 : len(str)-2]
-				fmt.Println(str)
+				str = str[1 : len(str)-1]
 				height, _ = strconv.Atoi(str)
-				round = -1
+				round = 0
 				step = "NEW_HEIGHT"
 				if uint64(height) != n.Height+1 || n.Step != "COMMIT" {
-					fmt.Printf("fuzzing: Wrong state: [%d/%d/%s] after %s\n", height, round, step, n.ToString())
+					fmt.Printf("fuzzing: Wrong state: [%d/%d/%s] after %s", height, round, step, n.ToString())
+					fmt.Printf("fuzzing: msg: %s height: %d", str, height)
 				}
 			} else if strings.Contains(message, "attempt enterNewRound to") {
 				str := message[strings.Index(message, "(")+1 : strings.Index(message, ")")]
@@ -66,8 +66,8 @@ func TestReadSynSystemLog(t *testing.T) {
 				height, _ = strconv.Atoi(parts[0])
 				round, _ = strconv.Atoi(parts[1])
 				step = "NEW_ROUND"
-				if uint64(height) != n.Height || int32(round) != n.Round+1 || (n.Step != "PROPOSE" && n.Step != "PREVOTE" && n.Step != "PRECOMMIT" && n.Step != "NEW_HEIGHT") {
-					fmt.Printf("fuzzing: Wrong state: [%d/%d/%s] after %s\n", height, round, step, n.ToString())
+				if uint64(height) != n.Height || int32(round) != 0 && int32(round) != n.Round+1 || (n.Step != "PROPOSE" && n.Step != "PREVOTE" && n.Step != "PRECOMMIT" && n.Step != "NEW_HEIGHT") {
+					fmt.Printf("fuzzing: Wrong state: [%d/%d/%s] after %s", height, round, step, n.ToString())
 				}
 			} else if strings.Contains(message, "attempt enterPropose to") {
 				str := message[strings.Index(message, "(")+1 : strings.Index(message, ")")]
@@ -76,7 +76,7 @@ func TestReadSynSystemLog(t *testing.T) {
 				round, _ = strconv.Atoi(parts[1])
 				step = "PROPOSE"
 				if uint64(height) != n.Height || int32(round) != n.Round || n.Step != "NEW_ROUND" {
-					fmt.Printf("fuzzing: Wrong state: [%d/%d/%s] after %s\n", height, round, step, n.ToString())
+					fmt.Printf("fuzzing: Wrong state: [%d/%d/%s] after %s", height, round, step, n.ToString())
 				}
 			} else if strings.Contains(message, "enter prevote") {
 				str := message[strings.Index(message, "(")+1 : strings.Index(message, ")")]
@@ -85,7 +85,7 @@ func TestReadSynSystemLog(t *testing.T) {
 				round, _ = strconv.Atoi(parts[1])
 				step = "PREVOTE"
 				if uint64(height) != n.Height || int32(round) != n.Round || n.Step != "PROPOSE" {
-					fmt.Printf("fuzzing: Wrong state: [%d/%d/%s] after %s\n", height, round, step, n.ToString())
+					fmt.Printf("fuzzing: Wrong state: [%d/%d/%s] after %s", height, round, step, n.ToString())
 				}
 			} else if strings.Contains(message, "enter precommit") {
 				str := message[strings.Index(message, "(")+1 : strings.Index(message, ")")]
@@ -94,7 +94,7 @@ func TestReadSynSystemLog(t *testing.T) {
 				round, _ = strconv.Atoi(parts[1])
 				step = "PRECOMMIT"
 				if uint64(height) != n.Height || int32(round) != n.Round || n.Step != "PREVOTE" {
-					fmt.Printf("fuzzing: Wrong state: [%d/%d/%s] after %s\n", height, round, step, n.ToString())
+					fmt.Printf("fuzzing: Wrong state: [%d/%d/%s] after %s", height, round, step, n.ToString())
 				}
 			} else if strings.Contains(message, "enter commit") {
 				str := message[strings.Index(message, "(")+1 : strings.Index(message, ")")]
@@ -103,7 +103,7 @@ func TestReadSynSystemLog(t *testing.T) {
 				round, _ = strconv.Atoi(parts[1])
 				step = "COMMIT"
 				if uint64(height) != n.Height || int32(round) != n.Round || n.Step != "PRECOMMIT" {
-					fmt.Printf("fuzzing: Wrong state: [%d/%d/%s] after %s\n", height, round, step, n.ToString())
+					fmt.Printf("fuzzing: Wrong state: [%d/%d/%s] after %s", height, round, step, n.ToString())
 				}
 			} else {
 				continue

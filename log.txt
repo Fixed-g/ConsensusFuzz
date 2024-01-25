@@ -1,16 +1,10 @@
-2024-01-09 23:49:34.811	[INFO]	[Consensus] [31;1m@chain1[0m	ConsensusFuzz/consensus_tbft_impl.go:1635	[QmQ5r6RevAzqUSFcBGykPEzf2puShW33oghdUZqDQW5Zq9]attempt enter new height to (1)
 
-2024-01-09 23:49:34.811	[INFO]	[Consensus] [31;1m@chain1[0m	ConsensusFuzz/consensus_tbft_impl.go:1690	[QmQ5r6RevAzqUSFcBGykPEzf2puShW33oghdUZqDQW5Zq9] attempt enterNewRound to (1/0)
-2024-01-09 23:49:34.811	[INFO]	[Consensus] [31;1m@chain1[0m	ConsensusFuzz/consensus_tbft_impl.go:1635	[QmQ5r6RevAzqUSFcBGykPEzf2puShW33oghdUZqDQW5Zq9]attempt enter new height to (1)
-2024-01-09 23:49:34.811	[INFO]	[Consensus] [31;1m@chain1[0m	ConsensusFuzz/consensus_tbft_impl.go:1690	[QmQ5r6RevAzqUSFcBGykPEzf2puShW33oghdUZqDQW5Zq9] attempt enterNewRound to (1/0)
-2024-01-09 23:49:34.811	[INFO]	[Consensus] [31;1m@chain1[0m	ConsensusFuzz/consensus_tbft_impl.go:1635	[QmQ5r6RevAzqUSFcBGykPEzf2puShW33oghdUZqDQW5Zq9]attempt enter new height to (1)
-2024-01-09 23:49:34.811	[INFO]	[Consensus] [31;1m@chain1[0m	ConsensusFuzz/consensus_tbft_impl.go:1635	[QmQ5r6RevAzqUSFcBGykPEzf2puShW33oghdUZqDQW5Zq9]attempt enter new height to (1)
-2024-01-09 23:49:34.811	[INFO]	[Consensus] [31;1m@chain1[0m	ConsensusFuzz/consensus_tbft_impl.go:1690	[QmQ5r6RevAzqUSFcBGykPEzf2puShW33oghdUZqDQW5Zq9] attempt enterNewRound to (1/0)
-2024-01-09 23:49:34.811	[INFO]	[Consensus] [31;1m@chain1[0m	ConsensusFuzz/consensus_tbft_impl.go:1635	[QmQ5r6RevAzqUSFcBGykPEzf2puShW33oghdUZqDQW5Zq9]attempt enter new height to (1)
-2024-01-09 23:49:34.811	[INFO]	[Consensus] [31;1m@chain1[0m	ConsensusFuzz/consensus_tbft_impl.go:1690	[QmQ5r6RevAzqUSFcBGykPEzf2puShW33oghdUZqDQW5Zq9] attempt enterNewRound to (1/0)
-2024-01-09 23:49:34.811	[INFO]	[Consensus] [31;1m@chain1[0m	ConsensusFuzz/consensus_tbft_impl.go:1719	[QmQ5r6RevAzqUSFcBGykPEzf2puShW33oghdUZqDQW5Zq9] attempt enterPropose to (1/0)
-2024-01-09 23:50:04.812	[INFO]	[Consensus] [31;1m@chain1[0m	ConsensusFuzz/consensus_tbft_impl.go:1863	[QmQ5r6RevAzqUSFcBGykPEzf2puShW33oghdUZqDQW5Zq9](1/0/PROPOSE) enter prevote (1/0)
-2024-01-09 23:50:04.821	[INFO]	[Consensus] [31;1m@chain1[0m	ConsensusFuzz/consensus_tbft_impl.go:1938	[QmQ5r6RevAzqUSFcBGykPEzf2puShW33oghdUZqDQW5Zq9](1/0/PREVOTE) enter precommit (1/0)
-2024-01-09 23:50:04.821	[INFO]	[Consensus] [31;1m@chain1[0m	ConsensusFuzz/consensus_tbft_impl.go:2033	[QmQ5r6RevAzqUSFcBGykPEzf2puShW33oghdUZqDQW5Zq9](1/0/PRECOMMIT) enter commit (1/0)
-2024-01-09 23:50:04.821	[INFO]	[Consensus] [31;1m@chain1[0m	ConsensusFuzz/consensus_tbft_impl.go:1690	[QmQ5r6RevAzqUSFcBGykPEzf2puShW33oghdUZqDQW5Zq9] attempt enterNewRound to (1/1)
-
+2024-01-24 17:46:51.089	[ERROR]	[Consensus] [31;1m@chain1[0m	ConsensusFuzz/log_reader.go:284	fuzzing: Delayed state: node: 2 [1/0/NEW_HEIGHT] after [1/0/NEW_HEIGHT]
+2024-01-24 17:46:51.090	[ERROR]	[Consensus] [31;1m@chain1[0m	ConsensusFuzz/log_reader.go:284	fuzzing: Delayed state: node: 4 [1/0/NEW_HEIGHT] after [1/0/NEW_HEIGHT]
+2024-01-24 17:46:51.090	[ERROR]	[Consensus] [31;1m@chain1[0m	ConsensusFuzz/log_reader.go:284	fuzzing: Delayed state: node: 3 [1/0/NEW_HEIGHT] after [1/0/NEW_HEIGHT]
+2024-01-24 17:47:20.922	[ERROR]	[Consensus] [31;1m@chain1[0m	ConsensusFuzz/log_reader.go:254	fuzzing: Wrong state: node:1 [1/0/PREVOTE] after [0/0/COMMIT]
+2024-01-24 17:47:20.922	[ERROR]	[Consensus] [31;1m@chain1[0m	ConsensusFuzz/log_reader.go:284	fuzzing: Delayed state: node: 1 [1/0/PREVOTE] after [1/0/PREVOTE]
+2024-01-24 17:47:20.923	[ERROR]	[Consensus] [31;1m@chain1[0m	ConsensusFuzz/log_reader.go:236	fuzzing: Wrong state: node:1 [1/1/NEW_ROUND] after [1/0/COMMIT]
+2024-01-24 17:47:20.923	[ERROR]	[Consensus] [31;1m@chain1[0m	ConsensusFuzz/log_reader.go:236	fuzzing: Wrong state: node:4 [1/1/NEW_ROUND] after [1/0/COMMIT]
+2024-01-24 17:47:20.923	[ERROR]	[Consensus] [31;1m@chain1[0m	ConsensusFuzz/log_reader.go:236	fuzzing: Wrong state: node:3 [1/1/NEW_ROUND] after [1/0/COMMIT]
+2024-01-24 17:47:20.923	[ERROR]	[Consensus] [31;1m@chain1[0m	ConsensusFuzz/log_reader.go:236	fuzzing: Wrong state: node:2 [1/1/NEW_ROUND] after [1/0/COMMIT]

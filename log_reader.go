@@ -48,7 +48,7 @@ var (
 		{
 			{
 				time:   time.Time{},
-				Height: -1,
+				Height: 0,
 				Round:  0,
 				Step:   "COMMIT",
 			},
@@ -56,7 +56,7 @@ var (
 		{
 			{
 				time:   time.Time{},
-				Height: -1,
+				Height: 0,
 				Round:  0,
 				Step:   "COMMIT",
 			},
@@ -64,7 +64,7 @@ var (
 		{
 			{
 				time:   time.Time{},
-				Height: -1,
+				Height: 0,
 				Round:  0,
 				Step:   "COMMIT",
 			},
@@ -72,7 +72,7 @@ var (
 		{
 			{
 				time:   time.Time{},
-				Height: -1,
+				Height: 0,
 				Round:  0,
 				Step:   "COMMIT",
 			},
@@ -80,7 +80,7 @@ var (
 		{
 			{
 				time:   time.Time{},
-				Height: -1,
+				Height: 0,
 				Round:  0,
 				Step:   "COMMIT",
 			},
@@ -219,69 +219,74 @@ func ReadSystemLog(id int, logger *protocol.Logger) error {
 			parts = strings.Split(message, " ")
 			if strings.Contains(message, "attempt enter new height to") {
 				str := parts[len(parts)-1]
-				str = str[1 : len(str)-2]
+				str = str[1 : len(str)-1]
 				height, _ = strconv.Atoi(str)
-				round = -1
+				round = 0
 				step = "NEW_HEIGHT"
 				if uint64(height) != n.Height+1 || n.Step != "COMMIT" {
-					(*logger).Errorf("fuzzing: Wrong state: [%d/%d/%s] after %s", height, round, step, n.ToString())
+					(*logger).Errorf("fuzzing: Wrong state: node:%d [%d/%d/%s] after %s", id, height, round, step, n.ToString())
 				}
 			} else if strings.Contains(message, "attempt enterNewRound to") {
-				str := message[strings.Index(message, "(")+1 : strings.Index(message, ")")]
+				str := parts[len(parts)-1]
+				str = str[1 : len(str)-1]
 				parts := strings.Split(str, "/")
 				height, _ = strconv.Atoi(parts[0])
 				round, _ = strconv.Atoi(parts[1])
 				step = "NEW_ROUND"
-				if uint64(height) != n.Height || int32(round) != n.Round+1 || (n.Step != "PROPOSE" && n.Step != "PREVOTE" && n.Step != "PRECOMMIT" && n.Step != "NEW_HEIGHT") {
-					(*logger).Errorf("fuzzing: Wrong state: [%d/%d/%s] after %s", height, round, step, n.ToString())
+				if uint64(height) != n.Height || int32(round) != 0 && int32(round) != n.Round+1 || (n.Step != "PROPOSE" && n.Step != "PREVOTE" && n.Step != "PRECOMMIT" && n.Step != "NEW_HEIGHT") {
+					(*logger).Errorf("fuzzing: Wrong state: node:%d [%d/%d/%s] after %s", id, height, round, step, n.ToString())
 				}
 			} else if strings.Contains(message, "attempt enterPropose to") {
-				str := message[strings.Index(message, "(")+1 : strings.Index(message, ")")]
+				str := parts[len(parts)-1]
+				str = str[1 : len(str)-1]
 				parts := strings.Split(str, "/")
 				height, _ = strconv.Atoi(parts[0])
 				round, _ = strconv.Atoi(parts[1])
 				step = "PROPOSE"
 				if uint64(height) != n.Height || int32(round) != n.Round || n.Step != "NEW_ROUND" {
-					(*logger).Errorf("fuzzing: Wrong state: [%d/%d/%s] after %s", height, round, step, n.ToString())
+					(*logger).Errorf("fuzzing: Wrong state: node:%d [%d/%d/%s] after %s", id, height, round, step, n.ToString())
 				}
 			} else if strings.Contains(message, "enter prevote") {
-				str := message[strings.Index(message, "(")+1 : strings.Index(message, ")")]
+				str := parts[len(parts)-1]
+				str = str[1 : len(str)-1]
 				parts := strings.Split(str, "/")
 				height, _ = strconv.Atoi(parts[0])
 				round, _ = strconv.Atoi(parts[1])
 				step = "PREVOTE"
 				if uint64(height) != n.Height || int32(round) != n.Round || n.Step != "PROPOSE" {
-					(*logger).Errorf("fuzzing: Wrong state: [%d/%d/%s] after %s", height, round, step, n.ToString())
+					(*logger).Errorf("fuzzing: Wrong state: node:%d [%d/%d/%s] after %s", id, height, round, step, n.ToString())
 				}
 			} else if strings.Contains(message, "enter precommit") {
-				str := message[strings.Index(message, "(")+1 : strings.Index(message, ")")]
+				str := parts[len(parts)-1]
+				str = str[1 : len(str)-1]
 				parts := strings.Split(str, "/")
 				height, _ = strconv.Atoi(parts[0])
 				round, _ = strconv.Atoi(parts[1])
 				step = "PRECOMMIT"
 				if uint64(height) != n.Height || int32(round) != n.Round || n.Step != "PREVOTE" {
-					(*logger).Errorf("fuzzing: Wrong state: [%d/%d/%s] after %s", height, round, step, n.ToString())
+					(*logger).Errorf("fuzzing: Wrong state: node:%d [%d/%d/%s] after %s", id, height, round, step, n.ToString())
 				}
 			} else if strings.Contains(message, "enter commit") {
-				str := message[strings.Index(message, "(")+1 : strings.Index(message, ")")]
+				str := parts[len(parts)-1]
+				str = str[1 : len(str)-1]
 				parts := strings.Split(str, "/")
 				height, _ = strconv.Atoi(parts[0])
 				round, _ = strconv.Atoi(parts[1])
 				step = "COMMIT"
 				if uint64(height) != n.Height || int32(round) != n.Round || n.Step != "PRECOMMIT" {
-					(*logger).Errorf("fuzzing: Wrong state: [%d/%d/%s] after %s", height, round, step, n.ToString())
+					(*logger).Errorf("fuzzing: Wrong state: node:%d [%d/%d/%s] after %s", id, height, round, step, n.ToString())
 				}
 			} else {
 				continue
 			}
 			n = NodeState{
-				time:   nowTime,
+				time:   t,
 				Height: uint64(height),
 				Round:  int32(round),
 				Step:   step,
 			}
 			if n.time.After(LastState(id).time.Add(time.Minute * 5)) {
-				(*logger).Errorf("fuzzing: Delayed state: [%d/%d/%s] after %s", height, round, step, n.ToString())
+				(*logger).Errorf("fuzzing: Delayed state: node: %d [%d/%d/%s] after %s", id, height, round, step, n.ToString())
 			}
 			StateLists[id] = append(StateLists[id], n)
 		}
