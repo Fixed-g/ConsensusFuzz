@@ -1901,11 +1901,19 @@ func (consensus *ConsensusTBFTImpl) enterPrevote(height uint64, round int32) {
 	// prevote := createPrevoteProto(consensus.Id, consensus.Height, consensus.Round, hash)
 	prevote := NewVote(tbftpb.VoteType_VOTE_PREVOTE, consensus.Id, consensus.Height, consensus.Round, hash)
 
+	// we mutate at here
+
+	prevote, err := MutateVote(prevote)
+	if err != nil {
+		consensus.logger.Errorf(err.Error())
+		return
+	}
+
 	// if hash is nil
 	if bytes.Equal(hash, nilHash) {
 		prevote.InvalidTxs = consensus.invalidTxs
 	}
-	err := consensus.signVote(prevote)
+	err = consensus.signVote(prevote)
 	if err != nil {
 		consensus.logger.Errorf("enter Prevote sign Vote error: %s", err)
 	}
@@ -1922,12 +1930,12 @@ func (consensus *ConsensusTBFTImpl) enterPrevote(height uint64, round int32) {
 
 	prevoteMsg := createPrevoteConsensusMsg(prevote)
 
-	prevoteMsg, err = MutateVoteMsg(prevoteMsg)
+	// prevoteMsg, err = MutateVoteMsg(prevoteMsg)
 
-	if err != nil {
-		consensus.logger.Errorf(err.Error())
-		return
-	}
+	// if err != nil {
+	// 	consensus.logger.Errorf(err.Error())
+	// 	return
+	// }
 
 	consensus.logger.Debugf("we mutate prevote message in enterPrevote function and send it as internalMsg")
 
@@ -1935,8 +1943,6 @@ func (consensus *ConsensusTBFTImpl) enterPrevote(height uint64, round int32) {
 	// prevoteMsg := createPrevoteConsensusMsg(prevote)
 
 	consensus.internalMsgC <- prevoteMsg
-	//debug test
-	consensus.logger.Debugf("test %s", prevoteMsg)
 
 	consensus.logger.Infof("[%s](%v/%v/%v) generated prevote (%d/%d/%x), time[sign:%dms]",
 		consensus.Id, consensus.Height, consensus.Round, consensus.Step,
@@ -2007,7 +2013,13 @@ func (consensus *ConsensusTBFTImpl) enterPrecommit(height uint64, round int32) {
 
 	// Broadcast precommit
 	precommit := NewVote(tbftpb.VoteType_VOTE_PRECOMMIT, consensus.Id, consensus.Height, consensus.Round, hash)
-	err := consensus.signVote(precommit)
+	precommit, err := MutateVote(precommit)
+	if err != nil {
+		consensus.logger.Errorf(err.Error())
+		return
+	}
+
+	err = consensus.signVote(precommit)
 	if err != nil {
 		consensus.logger.Errorf("enter Precommit sign Vote error: %s", err)
 	}
@@ -2021,13 +2033,13 @@ func (consensus *ConsensusTBFTImpl) enterPrecommit(height uint64, round int32) {
 
 	precommitMsg := createPrecommitConsensusMsg(precommit)
 
-	// TODO: 内部消息
-	// TODO: precommitMsg = mutateConsensusMsg(precommitMsg);
-	precommitMsg, err = MutateVoteMsg(precommitMsg)
-	if err != nil {
-		consensus.logger.Errorf(err.Error())
-		return
-	}
+	// // TODO: 内部消息
+	// // TODO: precommitMsg = mutateConsensusMsg(precommitMsg);
+	// precommitMsg, err = MutateVoteMsg(precommitMsg)
+	// if err != nil {
+	// 	consensus.logger.Errorf(err.Error())
+	// 	return
+	// }
 
 	consensus.logger.Debugf("we mutate precommit message in enterPrecommit function and send it as internalMsg")
 
@@ -2578,8 +2590,6 @@ func (consensus *ConsensusTBFTImpl) createConsensusMsgFromTBFTMsgBz(tbftMsgBz []
 				consensus.Id, consensus.Height, consensus.Round, consensus.Step,
 				precommit.Voter, precommit.Height, precommit.Round, precommit.Hash, err,
 			)
-			//add panic
-			// panic("verify precommit fail!")
 			return nil
 		}
 		return &ConsensusMsg{
@@ -2589,9 +2599,6 @@ func (consensus *ConsensusTBFTImpl) createConsensusMsgFromTBFTMsgBz(tbftMsgBz []
 	case tbftpb.TBFTMsgType_MSG_STATE:
 		state := new(tbftpb.GossipState)
 		mustUnmarshal(tbftMsg.Msg, state)
-
-		//add panic
-		// panic("get state message")
 
 		return &ConsensusMsg{
 			Type: tbftMsg.Type,

@@ -382,6 +382,9 @@ func MutateMap(input map[string]interface{}) (map[string]interface{}, error) {
 				fmt.Println(err)
 			}
 		case reflect.Map:
+			if k == "Endorsement" {
+				break
+			}
 			input[k], err = MutateMap(value.(map[string]interface{}))
 		default:
 			errMsg := fmt.Sprintf("mutateMap fail, unknow value type, type is %s, value is %v\n",
