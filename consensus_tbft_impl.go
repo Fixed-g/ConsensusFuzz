@@ -360,7 +360,6 @@ func (consensus *ConsensusTBFTImpl) Start() error {
 
 		consensus.logger.Infof("start ConsensusTBFTImpl[%s]", consensus.Id)
 		consensus.timeScheduler.Start()
-		consensus.startLogReader()
 		consensus.InitConsistentEngine()
 
 		err := consensus.replayWal()
@@ -372,7 +371,7 @@ func (consensus *ConsensusTBFTImpl) Start() error {
 		if err != nil {
 			return
 		}
-
+		consensus.startLogReader()
 		//consensus.gossip.start()
 		go consensus.handle()
 	}()

@@ -196,6 +196,9 @@ func ReadSystemLog(id int, logger *protocol.Logger) error {
 		}
 		// 解析日志内容
 		parts := strings.Split(linetr, "\t")
+		if id > 1 {
+			parts = parts[2:]
+		}
 		//如果不为标准日志格式，那么跳过
 		if len(parts) < 3 {
 			continue
