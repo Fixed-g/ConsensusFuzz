@@ -6,6 +6,7 @@ import (
 	"math"
 	"math/rand"
 	"reflect"
+	"strings"
 	"time"
 
 	"chainmaker.org/chainmaker/pb-go/v2/common"
@@ -368,6 +369,12 @@ func MutateMap(input map[string]interface{}) (map[string]interface{}, error) {
 
 	err = nil
 	for k, value := range input {
+		if strings.Contains(k, "Hash") {
+			fmt.Println(k)
+			input[k], err = value, nil
+			break
+		}
+
 		ident := reflect.ValueOf(value).Kind()
 		switch ident {
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Float32, reflect.Float64:
