@@ -2,15 +2,17 @@ package tbft
 
 import (
 	"chainmaker.org/chainmaker/protocol/v2"
+	"fmt"
 	"github.com/hpcloud/tail"
-	"regexp"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 )
 
-var filterErrorList = []string{}
+var filterErrorList = []string{
+	"fuzzing",
+}
 
 type Args struct {
 	intArgs       [6]uint64
@@ -20,7 +22,8 @@ type Args struct {
 }
 
 type HashSet struct {
-	m map[string]bool
+	mu sync.Mutex
+	m  map[string]bool
 }
 
 var Address = [5]string{"../../chainmaker-v2.3.2-wx-org1.chainmaker.org/log/system.log",
@@ -40,38 +43,50 @@ type NodeState struct {
 	Step string
 }
 
-var state = &[5]NodeState{
-	{
-		time:   time.Time{},
-		Height: 0,
-		Round:  0,
-		Step:   "",
-	},
-	{
-		time:   time.Time{},
-		Height: 0,
-		Round:  0,
-		Step:   "",
-	},
-	{
-		time:   time.Time{},
-		Height: 0,
-		Round:  0,
-		Step:   "",
-	},
-	{
-		time:   time.Time{},
-		Height: 0,
-		Round:  0,
-		Step:   "",
-	},
-	{
-		time:   time.Time{},
-		Height: 0,
-		Round:  0,
-		Step:   "",
-	},
-}
+var (
+	StateLists = [5][]NodeState{
+		{
+			{
+				time:   time.Time{},
+				Height: 0,
+				Round:  0,
+				Step:   "COMMIT",
+			},
+		},
+		{
+			{
+				time:   time.Time{},
+				Height: 0,
+				Round:  0,
+				Step:   "COMMIT",
+			},
+		},
+		{
+			{
+				time:   time.Time{},
+				Height: 0,
+				Round:  0,
+				Step:   "COMMIT",
+			},
+		},
+		{
+			{
+				time:   time.Time{},
+				Height: 0,
+				Round:  0,
+				Step:   "COMMIT",
+			},
+		},
+		{
+			{
+				time:   time.Time{},
+				Height: 0,
+				Round:  0,
+				Step:   "COMMIT",
+			},
+		},
+	}
+)
 
 type KeyValue struct {
 	Value      string
@@ -144,6 +159,15 @@ var Requestcache = &Cache{
 	store: make(map[string]KeyValue),
 }
 
+var stepList = map[string]string{
+	"NEW_HEIGHT": "attempt enter new height to (1)",
+	"NEW_ROUND":  "attempt enterNewRound to (1/0)",
+	"PROPOSE":    "attempt enterPropose to (1/0)",
+	"PREVOTE":    "enter prevote (1/0)",
+	"PRECOMMIT":  "enter precommit (1/0)",
+	"COMMIT":     "enter commit (1/0)",
+}
+
 func ReadSystemLog(id int, logger *protocol.Logger) error {
 	cfg := tail.Config{
 		ReOpen: true, // 当文件被移动或删除后，tail 将尝试重新打开文件
@@ -163,28 +187,6 @@ func ReadSystemLog(id int, logger *protocol.Logger) error {
 
 	layout := "2006-01-02 15:04:05.000"
 	nowTime := time.Now()
-	//// 定期清理过期数据
-	//go func() {
-	//	for {
-	//		time.Sleep(time.Second) // 每分钟检查一次过期数据
-	//
-	//		Requestcache.mu.Lock()
-	//		for key, item := range Requestcache.store {
-	//			if time.Now().After(item.Expiration) {
-	//				delete(Requestcache.store, key)
-	//			}
-	//		}
-	//		Requestcache.mu.Unlock()
-	//
-	//		ParamsMap.mu.Lock()
-	//		for key, item := range ParamsMap.store {
-	//			if time.Now().After(item.Expiration) {
-	//				delete(ParamsMap.store, key)
-	//			}
-	//		}
-	//		ParamsMap.mu.Unlock()
-	//	}
-	//}()
 
 	for line := range tails.Lines {
 		linetr := line.Text
@@ -194,6 +196,9 @@ func ReadSystemLog(id int, logger *protocol.Logger) error {
 		}
 		// 解析日志内容
 		parts := strings.Split(linetr, "\t")
+		if id > 1 {
+			parts = parts[2:]
+		}
 		//如果不为标准日志格式，那么跳过
 		if len(parts) < 3 {
 			continue
@@ -204,44 +209,118 @@ func ReadSystemLog(id int, logger *protocol.Logger) error {
 		if err != nil || t.Before(nowTime) {
 			continue
 		}
+		n := LastState(id)
+		if GetLen(id) != 1 && t.After(LastState(id).time.Add(time.Minute*5)) { // 5min 内未更新状态
+			(*logger).Errorf("fuzzing: Delayed state: node: %d after %s", id, n.ToString())
+			StateLists[id][GetLen(id)-1].time = t
+		}
 		level := parts[1]
 		message := strings.Join(parts[3:], " ")
 		// 解析日志级别
 		if strings.Contains(level, "ERROR") && !isFilterError(message) {
 			//处理日志,将错误日志打印出来,并找到匹配的对象加入corpors
-			(*logger).Errorf("fuzzing: Error occurred:%s", message)
+			(*logger).Infof("fuzzing: Error occurred:%s", message)
 		} else {
-			flag, _ := regexp.MatchString("\\([0-9]*/[0-9]*/\\w*\\)", message)
-			//记录上次请求的request
-			if flag {
-				stateStr := message[strings.Index(message, "(")+1 : strings.Index(message, ")")]
-				parts := strings.Split(stateStr, "/")
-				height, _ := strconv.Atoi(parts[0])
-				round, _ := strconv.Atoi(parts[1])
-				step := parts[2]
-				n := state[id]
-				if n.time.Equal(time.Time{}) { // 第一次状态存储
-					n.time = t
-					n.Height = uint64(height)
-					n.Round = int32(round)
-					n.Step = step
-				} else if strings.EqualFold(n.Step, step) && uint64(height) == n.Height && int32(round) == n.Round { // 状态未改变
-					// 与进入该状态的时间差
-					delta := t.Sub(n.time).Minutes()
-					if delta > 5 { // 超过5min未更新状态
-						(*logger).Errorf("fuzzing: Long time not changed: node:%d state:(%d/%d/%s)", id, height, round, step)
-					}
-				} else {
-					n.time = t
-					n.Height = uint64(height)
-					n.Round = int32(round)
-					n.Step = step
+			var height, round int
+			var step string
+			parts = strings.Split(message, " ")
+			if strings.Contains(message, "attempt enter new height to") {
+				str := parts[len(parts)-1]
+				str = str[1 : len(str)-1]
+				height, _ = strconv.Atoi(str)
+				round = 0
+				step = "NEW_HEIGHT"
+				if uint64(height) != n.Height+1 || n.Step != "COMMIT" {
+					(*logger).Errorf("fuzzing: Wrong state: node:%d [%d/%d/%s] after %s", id, height, round, step, n.ToString())
+				}
+			} else if strings.Contains(message, "attempt enterNewRound to") {
+				str := parts[len(parts)-1]
+				str = str[1 : len(str)-1]
+				parts := strings.Split(str, "/")
+				height, _ = strconv.Atoi(parts[0])
+				round, _ = strconv.Atoi(parts[1])
+				step = "NEW_ROUND"
+				if uint64(height) != n.Height || int32(round) != 0 && int32(round) != n.Round+1 || (n.Step != "PROPOSE" && n.Step != "PREVOTE" && n.Step != "PRECOMMIT" && n.Step != "NEW_HEIGHT" && n.Step != "COMMIT") {
+					(*logger).Errorf("fuzzing: Wrong state: node:%d [%d/%d/%s] after %s", id, height, round, step, n.ToString())
+				}
+			} else if strings.Contains(message, "attempt enterPropose to") {
+				str := parts[len(parts)-1]
+				str = str[1 : len(str)-1]
+				parts := strings.Split(str, "/")
+				height, _ = strconv.Atoi(parts[0])
+				round, _ = strconv.Atoi(parts[1])
+				step = "PROPOSE"
+				if uint64(height) != n.Height || int32(round) != n.Round || n.Step != "NEW_ROUND" {
+					(*logger).Errorf("fuzzing: Wrong state: node:%d [%d/%d/%s] after %s", id, height, round, step, n.ToString())
+				}
+			} else if strings.Contains(message, "enter prevote") {
+				str := parts[len(parts)-1]
+				str = str[1 : len(str)-1]
+				parts := strings.Split(str, "/")
+				height, _ = strconv.Atoi(parts[0])
+				round, _ = strconv.Atoi(parts[1])
+				step = "PREVOTE"
+				if uint64(height) != n.Height || int32(round) != n.Round || n.Step != "PROPOSE" {
+					(*logger).Errorf("fuzzing: Wrong state: node:%d [%d/%d/%s] after %s", id, height, round, step, n.ToString())
+				}
+			} else if strings.Contains(message, "enter precommit") {
+				str := parts[len(parts)-1]
+				str = str[1 : len(str)-1]
+				parts := strings.Split(str, "/")
+				height, _ = strconv.Atoi(parts[0])
+				round, _ = strconv.Atoi(parts[1])
+				step = "PRECOMMIT"
+				if uint64(height) != n.Height || int32(round) != n.Round || n.Step != "PREVOTE" {
+					(*logger).Errorf("fuzzing: Wrong state: node:%d [%d/%d/%s] after %s", id, height, round, step, n.ToString())
+				}
+			} else if strings.Contains(message, "enter commit") {
+				str := parts[len(parts)-1]
+				str = str[1 : len(str)-1]
+				parts := strings.Split(str, "/")
+				height, _ = strconv.Atoi(parts[0])
+				round, _ = strconv.Atoi(parts[1])
+				step = "COMMIT"
+				if uint64(height) != n.Height || int32(round) != n.Round || n.Step != "PRECOMMIT" {
+					(*logger).Errorf("fuzzing: Wrong state: node:%d [%d/%d/%s] after %s", id, height, round, step, n.ToString())
+				}
+			} else {
+				continue
+			}
+			newN := NodeState{
+				time:   t,
+				Height: uint64(height),
+				Round:  int32(round),
+				Step:   step,
+			}
+			StateLists[id] = append(StateLists[id], newN)
+			for i := 1; i < 5; i++ {
+				if i == id || GetLen(i) < GetLen(id) {
+					continue
+				}
+				ni := LastState(i)
+				if !n.Equals(ni) {
+					(*logger).Errorf("fuzzing: Diff state history: node: %d [%d/%d/%s] with node %d: %s", id, height, round, step, i, ni.ToString())
 				}
 			}
 		}
-
 	}
 	return nil
+}
+
+func GetLen(id int) int {
+	return len(StateLists[id])
+}
+
+func LastState(id int) NodeState {
+	return StateLists[id][len(StateLists[id])-1]
+}
+
+func (s *NodeState) ToString() string {
+	return fmt.Sprintf("[%d/%d/%s]", s.Height, s.Round, s.Step)
+}
+
+func (s *NodeState) Equals(state NodeState) bool {
+	return s.Height == state.Height && s.Round == state.Round && s.Step == state.Step
 }
 
 /*
@@ -330,6 +409,9 @@ func isFilterError(message string) bool {
 // Add 方法Add会返回一个bool类型的结果值，以表示添加元素值的操作是否成功。
 // 方法Add的声明中的接收者类型是*HashSet。
 func (set *HashSet) Add(e string) bool {
+	set.mu.Lock()
+	defer set.mu.Unlock()
+
 	if !set.m[e] { // 当前的m的值中还未包含以e的值为键的键值对
 		set.m[e] = true // 将键为e(代表的值)、元素为true的键值对添加到m的值当中
 		return true     // 添加成功
