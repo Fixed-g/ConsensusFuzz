@@ -1,0 +1,12 @@
+# fuzzing 总开关
+isFuzzNode: true
+# 单个fuzz开关
+sendProposeStateFuzz: false
+procProposeFuzz: true
+commitBlockFuzz: true
+delInvalidTxsFuzz: false
+enterPrevoteFuzz: true
+enterPrecommitFuzz: true
+othersFuzz: true
+# delay开关
+delay: true

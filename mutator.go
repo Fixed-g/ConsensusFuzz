@@ -366,7 +366,6 @@ func handleSlice(v reflect.Value, name string) ([]interface{}, error) {
 
 func MutateMap(input map[string]interface{}) (map[string]interface{}, error) {
 	var err error
-
 	err = nil
 	for k, value := range input {
 		if strings.Contains(k, "Hash") {
@@ -374,7 +373,6 @@ func MutateMap(input map[string]interface{}) (map[string]interface{}, error) {
 			input[k], err = value, nil
 			break
 		}
-
 		ident := reflect.ValueOf(value).Kind()
 		switch ident {
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Float32, reflect.Float64:

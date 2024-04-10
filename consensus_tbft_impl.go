@@ -12,6 +12,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"math/rand"
 	"reflect"
 	"strconv"
 	"sync"
@@ -401,15 +402,25 @@ func (consensus *ConsensusTBFTImpl) startLogReader() {
 func (consensus *ConsensusTBFTImpl) sendProposeState(isProposer bool) {
 	consensus.logger.Infof("[%s](%d/%d/%s) sendProposeState isProposer: %v",
 		consensus.Id, consensus.Height, consensus.Round, consensus.Step, isProposer)
-	// TODO: mutate here (true / false)
-	// TODO: type = mutateType(msgbus.ProposeState);isProposer = mutateBool(isPoposer);
-	consensus.logger.Infof("fuzzing started")
-	// new_isProposer := MutateBool(isProposer)
-	// consensus.logger.Debugf("we mutate proposestate message in sendProposeState function and send it")
 
 	new_isProposer := isProposer
-	consensus.logger.Debugf("we don't mutate proposestate message in sendProposeState function and send it")
-
+	nodeConfig := GetConfig()
+	var err error
+	if nodeConfig.IsFuzzNode {
+		if nodeConfig.SendProposeStateFuzz {
+			new_isProposer = MutateBool(isProposer)
+			if err != nil {
+				consensus.logger.Errorf(err.Error())
+				return
+			}
+			consensus.logger.Debugf("we mutate proposestate message in sendProposeState function and send it")
+		} else {
+			consensus.logger.Debugf("we don't mutate block message in sendProposeState function and send it")
+		}
+		if nodeConfig.Delay {
+			time.Sleep(time.Second * time.Duration(rand.Int()%10))
+		}
+	}
 	consensus.msgbus.PublishSafe(msgbus.ProposeState, new_isProposer)
 }
 
@@ -1049,17 +1060,24 @@ func (consensus *ConsensusTBFTImpl) procPropose(proposal *tbftpb.Proposal) {
 	// TODO: type = mutateType(msgbus.VerifyBlock); block = mutateBlock(proposal.Block);
 	// consensus.logger.Infof("[mutate] block: %d to %d", isProposer, new_isProposer)
 
-	block, err := MutateBlock(proposal.Block)
-	if err != nil {
-		consensus.logger.Errorf(err.Error())
-		return
+	nodeConfig := GetConfig()
+	block := proposal.Block
+	var err error
+	if nodeConfig.IsFuzzNode {
+		if nodeConfig.ProcProposeFuzz {
+			block, err = MutateBlock(proposal.Block)
+			if err != nil {
+				consensus.logger.Errorf(err.Error())
+				return
+			}
+			consensus.logger.Debugf("we mutate block message in procPropose function and send it")
+		} else {
+			consensus.logger.Debugf("we don't mutate block message in procPropose function and send it")
+		}
+		if nodeConfig.Delay {
+			time.Sleep(time.Second * time.Duration(rand.Int()%10))
+		}
 	}
-
-	consensus.logger.Debugf("we mutate block message in procPropose function and send it")
-
-	// block := proposal.Block
-	// consensus.logger.Debugf("we don't mutate block message in procPropose function and send it")
-
 	consensus.msgbus.PublishSafe(msgbus.VerifyBlock, block)
 
 	consensus.logger.Infof("[%s](%d/%d/%s) processed proposal (%d/%d/%x), time[verify:%dms]",
@@ -1383,17 +1401,24 @@ func (consensus *ConsensusTBFTImpl) commitBlock(block *common.Block, voteSet *tb
 	// TODO: need mutate
 	// TODO: type = mutateType(msgbus.commitBlock); block = mutateBlock(block);
 
-	new_block, err := MutateBlock(block)
-	if err != nil {
-		consensus.logger.Errorf(err.Error())
-		return
+	nodeConfig := GetConfig()
+	new_block := block
+	var err error
+	if nodeConfig.IsFuzzNode {
+		if nodeConfig.CommitBlockFuzz {
+			new_block, err = MutateBlock(block)
+			if err != nil {
+				consensus.logger.Errorf(err.Error())
+				return
+			}
+			consensus.logger.Debugf("we mutate CommitBlock message in commitBlock function and send it")
+		} else {
+			consensus.logger.Debugf("we don't mutate CommitBlock message in commitBlock function and send it")
+		}
+		if nodeConfig.Delay {
+			time.Sleep(time.Second * time.Duration(rand.Int()%10))
+		}
 	}
-
-	consensus.logger.Debugf("we mutate CommitBlock message in commitBlock function and send it")
-
-	// new_block := block
-	// consensus.logger.Debugf("we don't mutate CommitBlock message in commitBlock function and send it")
-
 	consensus.msgbus.Publish(msgbus.CommitBlock, new_block)
 
 	consensus.logger.Infof("[%s](%d/%d/%s) consensus commit block (%d/%x), time[marshalQC:%dms]",
@@ -1578,16 +1603,24 @@ func (consensus *ConsensusTBFTImpl) delInvalidTxs(vs *VoteSet, hash []byte) {
 			// TODO: need mutate
 			// TODO: type = mutateType(msgbus.RwSetVerifyFailTxs); payload = mutatePayload(payload);
 
-			// new_payload, err := MutateTxs(payload)
-			// if err != nil {
-			// 	consensus.logger.Errorf(err.Error())
-			// 	return
-			// }
-			// consensus.logger.Debugf("we mutate Txs message in delInvalidTxs function and send it")
-
+			nodeConfig := GetConfig()
 			new_payload := payload
-			consensus.logger.Debugf("we dont mutate Txs message in delInvalidTxs function and send it")
-
+			var err error
+			if nodeConfig.IsFuzzNode {
+				if nodeConfig.DelInvalidTxsFuzz {
+					new_payload, err = MutateTxs(payload)
+					if err != nil {
+						consensus.logger.Errorf(err.Error())
+						return
+					}
+					consensus.logger.Debugf("we mutate Txs message in delInvalidTxs function and send it")
+				} else {
+					consensus.logger.Debugf("we dont mutate Txs message in delInvalidTxs function and send it")
+				}
+				if nodeConfig.Delay {
+					time.Sleep(time.Second * time.Duration(rand.Int()%10))
+				}
+			}
 			consensus.msgbus.PublishSafe(msgbus.RwSetVerifyFailTxs, new_payload)
 		}
 	}
@@ -1902,10 +1935,22 @@ func (consensus *ConsensusTBFTImpl) enterPrevote(height uint64, round int32) {
 
 	// we mutate at here
 
-	prevote, err := MutateVote(prevote)
-	if err != nil {
-		consensus.logger.Errorf(err.Error())
-		return
+	nodeConfig := GetConfig()
+	var err error
+	if nodeConfig.IsFuzzNode {
+		if nodeConfig.EnterPrevoteFuzz {
+			prevote, err = MutateVote(prevote)
+			if err != nil {
+				consensus.logger.Errorf(err.Error())
+				return
+			}
+			consensus.logger.Debugf("we mutate prevote message in enterPrevote function and send it as internalMsg")
+		} else {
+			consensus.logger.Debugf("we don't mutate prevote message in enterPrevote function and send it as internalMsg")
+		}
+		if nodeConfig.Delay {
+			time.Sleep(time.Second * time.Duration(rand.Int()%10))
+		}
 	}
 
 	// if hash is nil
@@ -1919,7 +1964,6 @@ func (consensus *ConsensusTBFTImpl) enterPrevote(height uint64, round int32) {
 	signPrevoteTime := CurrentTime()
 
 	// TODO: 发送给自己的内部消息
-	// TODO: prevoteMsg = mutateConsensusMsg(prevoteMsg);
 	// prevoteMsg := findLatestMsgWithType(&consensus.messagePool, tbftpb.TBFTMsgType_MSG_PREVOTE)
 
 	// if prevoteMsg == nil {
@@ -1936,9 +1980,6 @@ func (consensus *ConsensusTBFTImpl) enterPrevote(height uint64, round int32) {
 	// 	return
 	// }
 
-	consensus.logger.Debugf("we mutate prevote message in enterPrevote function and send it as internalMsg")
-
-	// consensus.logger.Debugf("we don't mutate prevote message in enterPrevote function and send it as internalMsg")
 	// prevoteMsg := createPrevoteConsensusMsg(prevote)
 
 	consensus.internalMsgC <- prevoteMsg
@@ -2011,11 +2052,24 @@ func (consensus *ConsensusTBFTImpl) enterPrecommit(height uint64, round int32) {
 	}
 
 	// Broadcast precommit
+
+	nodeConfig := GetConfig()
 	precommit := NewVote(tbftpb.VoteType_VOTE_PRECOMMIT, consensus.Id, consensus.Height, consensus.Round, hash)
-	precommit, err := MutateVote(precommit)
-	if err != nil {
-		consensus.logger.Errorf(err.Error())
-		return
+	var err error
+	if nodeConfig.IsFuzzNode {
+		if nodeConfig.EnterPrecommitFuzz {
+			precommit, err = MutateVote(precommit)
+			if err != nil {
+				consensus.logger.Errorf(err.Error())
+				return
+			}
+			consensus.logger.Debugf("we mutate precommit message in enterPrecommit function and send it as internalMsg")
+		} else {
+			consensus.logger.Debugf("we don't mutate precommit message in enterPrevote function and send it as internalMsg")
+		}
+		if nodeConfig.Delay {
+			time.Sleep(time.Second * time.Duration(rand.Int()%10))
+		}
 	}
 
 	err = consensus.signVote(precommit)
@@ -2040,9 +2094,6 @@ func (consensus *ConsensusTBFTImpl) enterPrecommit(height uint64, round int32) {
 	// 	return
 	// }
 
-	consensus.logger.Debugf("we mutate precommit message in enterPrecommit function and send it as internalMsg")
-
-	// consensus.logger.Debugf("we don't mutate precommit message in enterPrevote function and send it as internalMsg")
 	// precommitMsg := createPrevoteConsensusMsg(precommit)
 
 	consensus.internalMsgC <- precommitMsg
