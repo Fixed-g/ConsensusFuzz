@@ -9,7 +9,8 @@ import (
 var addr = "./fuzzing_config.yml"
 
 type NodeConfig struct {
-	IsFuzzNode           bool `yaml:"isFuzzNode"`
+	IsFuzzNode bool `yaml:"isFuzzNode"`
+
 	ProcProposeFuzz      bool `yaml:"procProposeFuzz"`
 	SendProposeStateFuzz bool `yaml:"sendProposeStateFuzz"`
 	CommitBlockFuzz      bool `yaml:"commitBlockFuzz"`
@@ -17,7 +18,10 @@ type NodeConfig struct {
 	EnterPrevoteFuzz     bool `yaml:"enterPrevoteFuzz"`
 	EnterPrecommitFuzz   bool `yaml:"enterPrecommitFuzz"`
 	OthersFuzz           bool `yaml:"othersFuzz"`
-	Delay                bool `yaml:"delay"`
+
+	Delay     bool `yaml:"delay"`
+	DelayBase int  `yaml:"delayBase"`
+	DelayLim  int  `yaml:"delayLim"`
 }
 
 func GetConfig() *NodeConfig {

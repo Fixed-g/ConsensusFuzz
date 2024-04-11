@@ -417,8 +417,10 @@ func (consensus *ConsensusTBFTImpl) sendProposeState(isProposer bool) {
 		} else {
 			consensus.logger.Debugf("we don't mutate block message in sendProposeState function and send it")
 		}
+
 		if nodeConfig.Delay {
-			time.Sleep(time.Second * time.Duration(rand.Int()%10))
+			d := nodeConfig.DelayBase + rand.Int()%(nodeConfig.DelayLim-nodeConfig.DelayBase)
+			time.Sleep(time.Second * time.Duration(d))
 		}
 	}
 	consensus.msgbus.PublishSafe(msgbus.ProposeState, new_isProposer)
@@ -1074,8 +1076,10 @@ func (consensus *ConsensusTBFTImpl) procPropose(proposal *tbftpb.Proposal) {
 		} else {
 			consensus.logger.Debugf("we don't mutate block message in procPropose function and send it")
 		}
+
 		if nodeConfig.Delay {
-			time.Sleep(time.Second * time.Duration(rand.Int()%10))
+			d := nodeConfig.DelayBase + rand.Int()%(nodeConfig.DelayLim-nodeConfig.DelayBase)
+			time.Sleep(time.Second * time.Duration(d))
 		}
 	}
 	consensus.msgbus.PublishSafe(msgbus.VerifyBlock, block)
@@ -1415,8 +1419,10 @@ func (consensus *ConsensusTBFTImpl) commitBlock(block *common.Block, voteSet *tb
 		} else {
 			consensus.logger.Debugf("we don't mutate CommitBlock message in commitBlock function and send it")
 		}
+
 		if nodeConfig.Delay {
-			time.Sleep(time.Second * time.Duration(rand.Int()%10))
+			d := nodeConfig.DelayBase + rand.Int()%(nodeConfig.DelayLim-nodeConfig.DelayBase)
+			time.Sleep(time.Second * time.Duration(d))
 		}
 	}
 	consensus.msgbus.Publish(msgbus.CommitBlock, new_block)
@@ -1617,8 +1623,10 @@ func (consensus *ConsensusTBFTImpl) delInvalidTxs(vs *VoteSet, hash []byte) {
 				} else {
 					consensus.logger.Debugf("we dont mutate Txs message in delInvalidTxs function and send it")
 				}
+
 				if nodeConfig.Delay {
-					time.Sleep(time.Second * time.Duration(rand.Int()%10))
+					d := nodeConfig.DelayBase + rand.Int()%(nodeConfig.DelayLim-nodeConfig.DelayBase)
+					time.Sleep(time.Second * time.Duration(d))
 				}
 			}
 			consensus.msgbus.PublishSafe(msgbus.RwSetVerifyFailTxs, new_payload)
@@ -1948,8 +1956,10 @@ func (consensus *ConsensusTBFTImpl) enterPrevote(height uint64, round int32) {
 		} else {
 			consensus.logger.Debugf("we don't mutate prevote message in enterPrevote function and send it as internalMsg")
 		}
+
 		if nodeConfig.Delay {
-			time.Sleep(time.Second * time.Duration(rand.Int()%10))
+			d := nodeConfig.DelayBase + rand.Int()%(nodeConfig.DelayLim-nodeConfig.DelayBase)
+			time.Sleep(time.Second * time.Duration(d))
 		}
 	}
 
@@ -2068,7 +2078,8 @@ func (consensus *ConsensusTBFTImpl) enterPrecommit(height uint64, round int32) {
 			consensus.logger.Debugf("we don't mutate precommit message in enterPrevote function and send it as internalMsg")
 		}
 		if nodeConfig.Delay {
-			time.Sleep(time.Second * time.Duration(rand.Int()%10))
+			d := nodeConfig.DelayBase + rand.Int()%(nodeConfig.DelayLim-nodeConfig.DelayBase)
+			time.Sleep(time.Second * time.Duration(d))
 		}
 	}
 

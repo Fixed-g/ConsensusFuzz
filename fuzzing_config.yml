@@ -10,3 +10,5 @@ enterPrecommitFuzz: true
 othersFuzz: true
 # delay开关
 delay: true
+delayBase: 0
+delayLim: 10
