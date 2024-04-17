@@ -413,9 +413,9 @@ func (consensus *ConsensusTBFTImpl) sendProposeState(isProposer bool) {
 				consensus.logger.Errorf(err.Error())
 				return
 			}
-			consensus.logger.Debugf("we mutate proposestate message in sendProposeState function and send it")
+			consensus.logger.Infof("we mutate proposestate message in sendProposeState function and send it")
 		} else {
-			consensus.logger.Debugf("we don't mutate block message in sendProposeState function and send it")
+			consensus.logger.Infof("we don't mutate block message in sendProposeState function and send it")
 		}
 
 		if nodeConfig.Delay {
@@ -1072,9 +1072,9 @@ func (consensus *ConsensusTBFTImpl) procPropose(proposal *tbftpb.Proposal) {
 				consensus.logger.Errorf(err.Error())
 				return
 			}
-			consensus.logger.Debugf("we mutate block message in procPropose function and send it")
+			consensus.logger.Infof("we mutate block message in procPropose function and send it")
 		} else {
-			consensus.logger.Debugf("we don't mutate block message in procPropose function and send it")
+			consensus.logger.Infof("we don't mutate block message in procPropose function and send it")
 		}
 
 		if nodeConfig.Delay {
@@ -1415,9 +1415,9 @@ func (consensus *ConsensusTBFTImpl) commitBlock(block *common.Block, voteSet *tb
 				consensus.logger.Errorf(err.Error())
 				return
 			}
-			consensus.logger.Debugf("we mutate CommitBlock message in commitBlock function and send it")
+			consensus.logger.Infof("we mutate CommitBlock message in commitBlock function and send it")
 		} else {
-			consensus.logger.Debugf("we don't mutate CommitBlock message in commitBlock function and send it")
+			consensus.logger.Infof("we don't mutate CommitBlock message in commitBlock function and send it")
 		}
 
 		if nodeConfig.Delay {
@@ -1619,9 +1619,9 @@ func (consensus *ConsensusTBFTImpl) delInvalidTxs(vs *VoteSet, hash []byte) {
 						consensus.logger.Errorf(err.Error())
 						return
 					}
-					consensus.logger.Debugf("we mutate Txs message in delInvalidTxs function and send it")
+					consensus.logger.Infof("we mutate Txs message in delInvalidTxs function and send it")
 				} else {
-					consensus.logger.Debugf("we dont mutate Txs message in delInvalidTxs function and send it")
+					consensus.logger.Infof("we dont mutate Txs message in delInvalidTxs function and send it")
 				}
 
 				if nodeConfig.Delay {
@@ -1952,9 +1952,9 @@ func (consensus *ConsensusTBFTImpl) enterPrevote(height uint64, round int32) {
 				consensus.logger.Errorf(err.Error())
 				return
 			}
-			consensus.logger.Debugf("we mutate prevote message in enterPrevote function and send it as internalMsg")
+			consensus.logger.Infof("we mutate prevote message in enterPrevote function and send it as internalMsg")
 		} else {
-			consensus.logger.Debugf("we don't mutate prevote message in enterPrevote function and send it as internalMsg")
+			consensus.logger.Infof("we don't mutate prevote message in enterPrevote function and send it as internalMsg")
 		}
 
 		if nodeConfig.Delay {
@@ -1977,7 +1977,7 @@ func (consensus *ConsensusTBFTImpl) enterPrevote(height uint64, round int32) {
 	// prevoteMsg := findLatestMsgWithType(&consensus.messagePool, tbftpb.TBFTMsgType_MSG_PREVOTE)
 
 	// if prevoteMsg == nil {
-	// 	consensus.logger.Debugf("we don't find prevoteMsg in pool")
+	// 	consensus.logger.Infof("we don't find prevoteMsg in pool")
 	// 	prevoteMsg = createPrevoteConsensusMsg(prevote)
 	// }
 
@@ -2073,9 +2073,9 @@ func (consensus *ConsensusTBFTImpl) enterPrecommit(height uint64, round int32) {
 				consensus.logger.Errorf(err.Error())
 				return
 			}
-			consensus.logger.Debugf("we mutate precommit message in enterPrecommit function and send it as internalMsg")
+			consensus.logger.Infof("we mutate precommit message in enterPrecommit function and send it as internalMsg")
 		} else {
-			consensus.logger.Debugf("we don't mutate precommit message in enterPrevote function and send it as internalMsg")
+			consensus.logger.Infof("we don't mutate precommit message in enterPrevote function and send it as internalMsg")
 		}
 		if nodeConfig.Delay {
 			d := nodeConfig.DelayBase + rand.Int()%(nodeConfig.DelayLim-nodeConfig.DelayBase)
