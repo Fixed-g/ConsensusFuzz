@@ -77,6 +77,24 @@ func MapToTxs(m map[string]interface{}) *consensuspb.RwSetVerifyFailTxs {
 	return txs
 }
 
+func MapToGossipState(m map[string]interface{}) *tbftpb.GossipState {
+	state := &tbftpb.GossipState{}
+	err := mapstructure.Decode(m, state)
+	if err != nil {
+		return nil
+	}
+	return state
+}
+
+func MapToRoundQC(m map[string]interface{}) *tbftpb.RoundQC {
+	roundQC := &tbftpb.RoundQC{}
+	err := mapstructure.Decode(m, roundQC)
+	if err != nil {
+		return nil
+	}
+	return roundQC
+}
+
 func MutateBool(b bool) bool {
 	return Generate_random_bool()
 }
@@ -171,6 +189,37 @@ func MutateProposalMsg(msg *ConsensusMsg) (*ConsensusMsg, error) {
 	}
 	msg = MapToProposalMsg(msg_map, msg.Type)
 	return msg, nil
+}
+
+// Broadcaster Mutations:
+func MutateGossipState(state *tbftpb.GossipState) (*tbftpb.GossipState, error) {
+	var err error
+	var state_map map[string]interface{}
+	state_map, err = StructToMap(*state)
+	if err != nil {
+		return nil, err
+	}
+	state_map, err = MutateMap(state_map)
+	if err != nil {
+		return nil, err
+	}
+	state = MapToGossipState(state_map)
+	return state, nil
+}
+
+func MutateRoundQC(roundQC *tbftpb.RoundQC) (*tbftpb.RoundQC, error) {
+	var err error
+	var roundQC_map map[string]interface{}
+	roundQC_map, err = StructToMap(*roundQC)
+	if err != nil {
+		return nil, err
+	}
+	roundQC_map, err = MutateMap(roundQC_map)
+	if err != nil {
+		return nil, err
+	}
+	roundQC = MapToRoundQC(roundQC_map)
+	return roundQC, nil
 }
 
 const (

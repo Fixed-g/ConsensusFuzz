@@ -17,7 +17,11 @@ type NodeConfig struct {
 	DelInvalidTxsFuzz    bool `yaml:"delInvalidTxsFuzz"`
 	EnterPrevoteFuzz     bool `yaml:"enterPrevoteFuzz"`
 	EnterPrecommitFuzz   bool `yaml:"enterPrecommitFuzz"`
-	OthersFuzz           bool `yaml:"othersFuzz"`
+
+	SendStateFuzz   bool `yaml:"sendStateFuzz"`
+	SendRoundQCFuzz bool `yaml:"sendRoundQCFuzz"`
+
+	OthersFuzz bool `yaml:"othersFuzz"`
 
 	Delay     bool `yaml:"delay"`
 	DelayBase int  `yaml:"delayBase"`

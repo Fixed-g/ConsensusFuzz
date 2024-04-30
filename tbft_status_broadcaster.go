@@ -2,6 +2,7 @@ package tbft
 
 import (
 	"errors"
+	"math/rand"
 	"time"
 
 	"chainmaker.org/chainmaker/common/v2/msgbus"
@@ -178,7 +179,27 @@ func sendState(local *ConsensusTBFTImpl, remoteInfo consistent_service.Node,
 	if local.heightRoundVoteSet.getRoundVoteSet(local.Round) != nil {
 		gossipProto.RoundVoteSet = local.heightRoundVoteSet.getRoundVoteSet(local.Round).ToProto()
 	}
-	msg := proto.Clone(gossipProto)
+	// todo: mutate here
+	nodeConfig := GetConfig()
+	var err error
+	new_gossipProto := gossipProto
+	if nodeConfig.IsFuzzNode {
+		if nodeConfig.SendStateFuzz {
+			new_gossipProto, err = MutateGossipState(new_gossipProto)
+			if err != nil {
+				local.logger.Errorf(err.Error())
+				return
+			}
+			local.logger.Infof("we mutate gossipProto message in sendState function and send it as internalMsg")
+		} else {
+			local.logger.Infof("we don't mutate gossipProto message in sendState function and send it as internalMsg")
+		}
+		if nodeConfig.Delay {
+			d := nodeConfig.DelayBase + rand.Int()%(nodeConfig.DelayLim-nodeConfig.DelayBase)
+			time.Sleep(time.Second * time.Duration(d))
+		}
+	}
+	msg := proto.Clone(new_gossipProto)
 
 	tbftMsg := &tbftpb.TBFTMsg{
 		Type: tbftpb.TBFTMsgType_MSG_STATE,
@@ -378,9 +399,30 @@ func sendRoundQC(local *ConsensusTBFTImpl,
 				Qc:     voteSet.ToProto(),
 			}
 
+			// todo: mutate here
+			nodeConfig := GetConfig()
+			var err error
+			new_roundQC := roundQC
+			if nodeConfig.IsFuzzNode {
+				if nodeConfig.SendRoundQCFuzz {
+					new_roundQC, err = MutateRoundQC(roundQC)
+					if err != nil {
+						local.logger.Errorf(err.Error())
+						return
+					}
+					local.logger.Infof("we mutate roundQC message in sendRoundQC function and send it as internalMsg")
+				} else {
+					local.logger.Infof("we don't mutate roundQC message in sendRoundQC function and send it as internalMsg")
+				}
+				if nodeConfig.Delay {
+					d := nodeConfig.DelayBase + rand.Int()%(nodeConfig.DelayLim-nodeConfig.DelayBase)
+					time.Sleep(time.Second * time.Duration(d))
+				}
+			}
+
 			tbftMsg := &tbftpb.TBFTMsg{
 				Type: tbftpb.TBFTMsgType_MSG_SEND_ROUND_QC,
-				Msg:  mustMarshal(roundQC),
+				Msg:  mustMarshal(new_roundQC),
 			}
 			netMsg := &netpb.NetMsg{
 				Payload: mustMarshal(tbftMsg),

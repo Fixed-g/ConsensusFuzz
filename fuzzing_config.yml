@@ -1,12 +1,16 @@
 # fuzzing 总开关
-isFuzzNode: true
+isFuzzNode: false
 # 单个fuzz开关
+  # impl
 sendProposeStateFuzz: false
 procProposeFuzz: true
 commitBlockFuzz: true
 delInvalidTxsFuzz: false
 enterPrevoteFuzz: true
 enterPrecommitFuzz: true
+  # status_broadcaster
+sendStateFuzz: true
+sendRoundQCFuzz: true
 othersFuzz: true
 # delay开关
 delay: true

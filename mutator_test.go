@@ -1,6 +1,7 @@
 package tbft
 
 import (
+	tbftpb "chainmaker.org/chainmaker/pb-go/v2/consensus/tbft"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -11,7 +12,7 @@ import (
 )
 
 func TestMutateMap(t *testing.T) {
-	filePtr, err := os.Open("./test.json")
+	filePtr, err := os.Open("./block.json")
 	if err != nil {
 		fmt.Println("file open fail")
 		return
@@ -48,4 +49,44 @@ func TestMutateMap(t *testing.T) {
 	fmt.Println("mutate")
 	info, _ := MutateMap(mapnow)
 	fmt.Println(info)
+}
+
+type A struct {
+	val int
+}
+
+type B struct {
+	a *A
+}
+
+func C(a *A) {
+	return
+}
+
+func TestNilPanic(t *testing.T) {
+
+}
+
+func TestGossipState(t *testing.T) {
+	proposal := []byte("123")
+	roundVoteSet := &tbftpb.RoundVoteSet{
+		Height:     1,
+		Round:      2,
+		Prevotes:   nil,
+		Precommits: nil,
+	}
+	gossipProto := &tbftpb.GossipState{
+		Id:               "1",
+		Height:           2,
+		Round:            3,
+		Step:             4,
+		Proposal:         proposal,
+		VerifingProposal: proposal,
+		RoundVoteSet:     roundVoteSet,
+	}
+	m, _ := StructToMap(*gossipProto)
+	fmt.Println(m)
+	new_state := MapToGossipState(m)
+	new_m, _ := StructToMap(*new_state)
+	fmt.Println(new_m)
 }

@@ -23,6 +23,8 @@ const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 var seededRand *rand.Rand = rand.New(rand.NewSource(int64(time.Now().Nanosecond())))
 
+const nilChance = 10
+
 func Generate_random_bool() bool {
 	return seededRand.Intn(2) != 0
 }
@@ -241,6 +243,9 @@ func handle_bytes_mutate(bytes []byte, name string) []byte {
 	if seededRand.Intn(100) < 80 {
 		return bytes
 	}
+	if seededRand.Intn(100) < nilChance {
+		return nil
+	}
 
 	switch name {
 	case "MemberInfo":
@@ -304,6 +309,9 @@ func handleSlice(v reflect.Value, name string) ([]interface{}, error) {
 	if v.Type().Kind() != reflect.Slice {
 		return nil, errors.New("incorrect config type: config type should be slice")
 	}
+	if seededRand.Intn(100) < nilChance {
+		return nil, nil
+	}
 
 	if v.Len() <= 0 || !v.IsValid() || v.IsNil() {
 		return nil, nil
@@ -365,6 +373,9 @@ func handleSlice(v reflect.Value, name string) ([]interface{}, error) {
 }
 
 func MutateMap(input map[string]interface{}) (map[string]interface{}, error) {
+	if seededRand.Intn(100) < nilChance {
+		return nil, nil
+	}
 	var err error
 	err = nil
 	for k, value := range input {
