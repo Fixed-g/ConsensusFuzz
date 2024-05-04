@@ -18,8 +18,14 @@ type NodeConfig struct {
 	EnterPrevoteFuzz     bool `yaml:"enterPrevoteFuzz"`
 	EnterPrecommitFuzz   bool `yaml:"enterPrecommitFuzz"`
 
-	SendStateFuzz   bool `yaml:"sendStateFuzz"`
-	SendRoundQCFuzz bool `yaml:"sendRoundQCFuzz"`
+	SendStateFuzz            bool `yaml:"sendStateFuzz"`
+	SendRoundQCFuzz          bool `yaml:"sendRoundQCFuzz"`
+	sendPrecommitInStateFuzz bool `yaml:"sendPrecommitInStateFuzz"`
+	sendPrevoteInStateFuzz   bool `yaml:"sendPrevoteInStateFuzz"`
+	sendProposalInStateFuzz  bool `yaml:"sendProposalInStateFuzz"`
+	sendPrecommitOfRoundFuzz bool `yaml:"sendPrecommitOfRoundFuzz"`
+	sendPrevoteOfRoundFuzz   bool `yaml:"sendPrevoteOfRoundFuzz"`
+	sendProposalOfRoundFuzz  bool `yaml:"sendProposalOfRoundFuzz"`
 
 	OthersFuzz bool `yaml:"othersFuzz"`
 

@@ -190,9 +190,9 @@ func sendState(local *ConsensusTBFTImpl, remoteInfo consistent_service.Node,
 				local.logger.Errorf(err.Error())
 				return
 			}
-			local.logger.Infof("we mutate gossipProto message in sendState function and send it as internalMsg")
+			local.logger.Infof("we mutate gossipProto message in sendState function and send it as netMsg")
 		} else {
-			local.logger.Infof("we don't mutate gossipProto message in sendState function and send it as internalMsg")
+			local.logger.Infof("we don't mutate gossipProto message in sendState function and send it as netMsg")
 		}
 		if nodeConfig.Delay {
 			d := nodeConfig.DelayBase + rand.Int()%(nodeConfig.DelayLim-nodeConfig.DelayBase)
@@ -220,7 +220,28 @@ func sendState(local *ConsensusTBFTImpl, remoteInfo consistent_service.Node,
 func sendProposalOfRound(local *ConsensusTBFTImpl, remoteInfo consistent_service.Node,
 	remoter *RemoteState, netMSGs *[]*netpb.NetMsg) {
 	if local.Proposal != nil && local.Proposal.Bytes != nil && local.Proposal.PbMsg != nil {
-		msg := createProposalTBFTMsg(local.Proposal)
+		// mutate here
+		nodeConfig := GetConfig()
+		var err error
+		new_proposal := local.Proposal
+		if nodeConfig.IsFuzzNode {
+			if nodeConfig.sendProposalOfRoundFuzz {
+				new_proposal, err = MutateProposal(local.Proposal)
+				if err != nil {
+					local.logger.Errorf(err.Error())
+					return
+				}
+				local.logger.Infof("we mutate proposal message in sendProposalOfRound function and send it as netMsg")
+			} else {
+				local.logger.Infof("we don't mutate proposal message in sendProposalOfRound function and send it as netMsg")
+			}
+			if nodeConfig.Delay {
+				d := nodeConfig.DelayBase + rand.Int()%(nodeConfig.DelayLim-nodeConfig.DelayBase)
+				time.Sleep(time.Second * time.Duration(d))
+			}
+		}
+
+		msg := createProposalTBFTMsg(new_proposal)
 		netMsg := &netpb.NetMsg{
 			Payload: mustMarshal(msg),
 			Type:    netpb.NetMsg_CONSISTENT_MSG,
@@ -245,6 +266,28 @@ func sendPrevoteOfRound(local *ConsensusTBFTImpl,
 		if ok && remoter.RoundVoteSet != nil && remoter.RoundVoteSet.Prevotes != nil {
 
 			if _, pOk := remoter.RoundVoteSet.Prevotes.Votes[local.Id]; !pOk {
+				// mutate here
+				nodeConfig := GetConfig()
+				var err error
+				new_vote := vote
+				if nodeConfig.IsFuzzNode {
+					if nodeConfig.sendPrevoteOfRoundFuzz {
+						new_vote, err = MutateVote(vote)
+						vote = new_vote
+						if err != nil {
+							local.logger.Errorf(err.Error())
+							return
+						}
+						local.logger.Infof("we mutate vote message in sendPrevoteOfRound function and send it as netMsg")
+					} else {
+						local.logger.Infof("we don't mutate vote message in sendPrevoteOfRound function and send it as netMsg")
+					}
+					if nodeConfig.Delay {
+						d := nodeConfig.DelayBase + rand.Int()%(nodeConfig.DelayLim-nodeConfig.DelayBase)
+						time.Sleep(time.Second * time.Duration(d))
+					}
+				}
+
 				msg := createPrevoteTBFTMsg(vote)
 				netMsg := &netpb.NetMsg{
 					Payload: mustMarshal(msg),
@@ -269,8 +312,29 @@ func sendPrecommitOfRound(local *ConsensusTBFTImpl,
 	if precommitVs != nil {
 		vote, ok := precommitVs.Votes[local.Id]
 		if ok && remoter.RoundVoteSet != nil && remoter.RoundVoteSet.Precommits != nil {
-
 			if _, pOk := remoter.RoundVoteSet.Precommits.Votes[local.Id]; !pOk {
+				// mutate here
+				nodeConfig := GetConfig()
+				var err error
+				new_vote := vote
+				if nodeConfig.IsFuzzNode {
+					if nodeConfig.sendPrecommitOfRoundFuzz {
+						new_vote, err = MutateVote(vote)
+						vote = new_vote
+						if err != nil {
+							local.logger.Errorf(err.Error())
+							return
+						}
+						local.logger.Infof("we mutate vote message in sendPrecommitOfRound function and send it as netMsg")
+					} else {
+						local.logger.Infof("we don't mutate vote message in sendPrecommitOfRound function and send it as netMsg")
+					}
+					if nodeConfig.Delay {
+						d := nodeConfig.DelayBase + rand.Int()%(nodeConfig.DelayLim-nodeConfig.DelayBase)
+						time.Sleep(time.Second * time.Duration(d))
+					}
+				}
+
 				msg := createPrecommitTBFTMsg(vote)
 				netMsg := &netpb.NetMsg{
 					Payload: mustMarshal(msg),
@@ -290,7 +354,28 @@ func sendPrecommitOfRound(local *ConsensusTBFTImpl,
 func sendProposalInState(state *ConsensusState, remoter *RemoteState, netMSGs *[]*netpb.NetMsg) {
 	// only the proposer has the serialized proposal
 	if state.Proposal != nil && state.Proposal.Bytes != nil && state.Proposal.PbMsg != nil {
-		msg := createProposalTBFTMsg(state.Proposal)
+		// mutate here
+		nodeConfig := GetConfig()
+		var err error
+		new_proposal := state.Proposal
+		if nodeConfig.IsFuzzNode {
+			if nodeConfig.sendProposalInStateFuzz {
+				new_proposal, err = MutateProposal(state.Proposal)
+				if err != nil {
+					state.logger.Errorf(err.Error())
+					return
+				}
+				state.logger.Infof("we mutate proposal message in sendProposalInState function and send it as netMsg")
+			} else {
+				state.logger.Infof("we don't mutate proposal message in sendProposalInState function and send it as netMsg")
+			}
+			if nodeConfig.Delay {
+				d := nodeConfig.DelayBase + rand.Int()%(nodeConfig.DelayLim-nodeConfig.DelayBase)
+				time.Sleep(time.Second * time.Duration(d))
+			}
+		}
+
+		msg := createProposalTBFTMsg(new_proposal /*state.Proposal*/)
 		netMsg := &netpb.NetMsg{
 			Payload: mustMarshal(msg),
 			Type:    netpb.NetMsg_CONSISTENT_MSG,
@@ -314,6 +399,28 @@ func sendPrevoteInState(local *ConsensusTBFTImpl, state *ConsensusState,
 		roundVoteSet := remoter.RoundVoteSet
 		if ok && roundVoteSet != nil && roundVoteSet.Prevotes != nil {
 			if _, pOk := roundVoteSet.Prevotes.Votes[local.Id]; !pOk {
+				// mutate here
+				nodeConfig := GetConfig()
+				var err error
+				new_vote := vote
+				if nodeConfig.IsFuzzNode {
+					if nodeConfig.sendPrevoteInStateFuzz {
+						new_vote, err = MutateVote(vote)
+						vote = new_vote
+						if err != nil {
+							local.logger.Errorf(err.Error())
+							return
+						}
+						local.logger.Infof("we mutate vote message in sendPrevoteInState function and send it as netMsg")
+					} else {
+						local.logger.Infof("we don't mutate vote message in sendPrevoteInState function and send it as netMsg")
+					}
+					if nodeConfig.Delay {
+						d := nodeConfig.DelayBase + rand.Int()%(nodeConfig.DelayLim-nodeConfig.DelayBase)
+						time.Sleep(time.Second * time.Duration(d))
+					}
+				}
+
 				msg := createPrevoteTBFTMsg(vote)
 				netMsg := &netpb.NetMsg{
 					Payload: mustMarshal(msg),
@@ -339,6 +446,28 @@ func sendPrecommitInState(local *ConsensusTBFTImpl, state *ConsensusState,
 		roundVoteSet := remoter.RoundVoteSet
 		if ok && roundVoteSet != nil && roundVoteSet.Precommits != nil {
 			if _, pOk := roundVoteSet.Precommits.Votes[local.Id]; !pOk {
+				// mutate here
+				nodeConfig := GetConfig()
+				var err error
+				new_vote := vote
+				if nodeConfig.IsFuzzNode {
+					if nodeConfig.sendPrecommitInStateFuzz {
+						new_vote, err = MutateVote(vote)
+						vote = new_vote
+						if err != nil {
+							local.logger.Errorf(err.Error())
+							return
+						}
+						local.logger.Infof("we mutate vote message in sendPrecommitInState function and send it as netMsg")
+					} else {
+						local.logger.Infof("we don't mutate vote message in sendPrecommitInState function and send it as netMsg")
+					}
+					if nodeConfig.Delay {
+						d := nodeConfig.DelayBase + rand.Int()%(nodeConfig.DelayLim-nodeConfig.DelayBase)
+						time.Sleep(time.Second * time.Duration(d))
+					}
+				}
+
 				msg := createPrecommitTBFTMsg(vote)
 				netMsg := &netpb.NetMsg{
 					Payload: mustMarshal(msg),
@@ -410,9 +539,9 @@ func sendRoundQC(local *ConsensusTBFTImpl,
 						local.logger.Errorf(err.Error())
 						return
 					}
-					local.logger.Infof("we mutate roundQC message in sendRoundQC function and send it as internalMsg")
+					local.logger.Infof("we mutate roundQC message in sendRoundQC function and send it as netMsg")
 				} else {
-					local.logger.Infof("we don't mutate roundQC message in sendRoundQC function and send it as internalMsg")
+					local.logger.Infof("we don't mutate roundQC message in sendRoundQC function and send it as netMsg")
 				}
 				if nodeConfig.Delay {
 					d := nodeConfig.DelayBase + rand.Int()%(nodeConfig.DelayLim-nodeConfig.DelayBase)
