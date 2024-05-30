@@ -179,6 +179,7 @@ func sendState(local *ConsensusTBFTImpl, remoteInfo consistent_service.Node,
 	if local.heightRoundVoteSet.getRoundVoteSet(local.Round) != nil {
 		gossipProto.RoundVoteSet = local.heightRoundVoteSet.getRoundVoteSet(local.Round).ToProto()
 	}
+
 	// todo: mutate here
 	nodeConfig := GetConfig()
 	var err error

@@ -1,7 +1,7 @@
 # fuzzing 总开关
 isFuzzNode: false
 # 单个fuzz开关
-  # impl
+  # consensus_tbft_impl
 sendProposeStateFuzz: true
 procProposeFuzz: true
 commitBlockFuzz: true
@@ -17,7 +17,7 @@ sendProposalInStateFuzz: true
 sendPrecommitOfRoundFuzz: true
 sendPrevoteOfRoundFuzz: true
 sendProposalOfRoundFuzz: true
-
+# reserved option
 othersFuzz: true
 # delay开关
 delay: false

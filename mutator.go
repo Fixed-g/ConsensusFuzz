@@ -398,10 +398,31 @@ func MutateMap(input map[string]interface{}) (map[string]interface{}, error) {
 				fmt.Println(err)
 			}
 		case reflect.Map:
-			if k == "Endorsement" {
-				break
-			}
 			input[k], err = MutateMap(value.(map[string]interface{}))
+		case reflect.Ptr:
+			fmt.Printf("ptr mutate!\n")
+			if reflect.ValueOf(value).Elem().Kind() != reflect.Struct {
+				if seededRand.Intn(100) < nilChance {
+					input[k] = nil
+				} else {
+					input[k] = value
+				}
+			} else {
+				value = reflect.ValueOf(value).Elem().Interface()
+				value, err = StructToMap(value)
+				if err != nil {
+					fmt.Println(err)
+				}
+				newValue, err := MutateMap(value.(map[string]interface{}))
+				if newValue != nil {
+					input[k] = &newValue
+				} else {
+					input[k] = nil
+				}
+				if err != nil {
+					fmt.Println(err)
+				}
+			}
 		default:
 			errMsg := fmt.Sprintf("mutateMap fail, unknow value type, type is %s, value is %v\n",
 				ident, value)

@@ -292,9 +292,9 @@ func StructToMap(config interface{}) (map[string]interface{}, error) {
 			}
 			result[configField] = v
 		case reflect.Map:
-			v := parseMap(rv)
-			if v == nil {
-				continue
+			v, err := parseMap(rv)
+			if err != nil {
+				return nil, err
 			}
 			result[configField] = v
 		case reflect.Slice:
@@ -334,16 +334,83 @@ func parsePtr(v reflect.Value) (map[string]interface{}, error) {
 	return StructToMap(v.Interface())
 }
 
-func parseMap(v reflect.Value) map[string]interface{} {
+func parseMap(v reflect.Value) (map[string]interface{}, error) {
 	if v.IsNil() {
-		return nil
+		return nil, nil
 	}
 	result := make(map[string]interface{})
 	for _, key := range v.MapKeys() {
-		val := v.MapIndex(key)
-		result[key.String()] = val.Interface()
+		// changed here
+		rv := v.MapIndex(key)
+		if rv.Kind() == reflect.Interface {
+			rv = rv.Elem()
+		}
+		switch rv.Kind() {
+		case reflect.Int:
+			result[key.String()] = rv.Interface()
+		case reflect.Int8:
+			result[key.String()] = rv.Interface()
+		case reflect.Int16:
+			result[key.String()] = rv.Interface()
+		case reflect.Int32:
+			result[key.String()] = rv.Interface()
+		case reflect.Int64:
+			result[key.String()] = rv.Interface()
+		case reflect.Uint:
+			result[key.String()] = rv.Interface()
+		case reflect.Uint8:
+			result[key.String()] = rv.Interface()
+		case reflect.Uint16:
+			result[key.String()] = rv.Interface()
+		case reflect.Uint32:
+			result[key.String()] = rv.Interface()
+		case reflect.Uint64:
+			result[key.String()] = rv.Interface()
+		case reflect.Float32:
+			result[key.String()] = rv.Interface()
+		case reflect.Float64:
+			result[key.String()] = rv.Interface()
+		case reflect.String:
+			result[key.String()] = rv.Interface()
+		case reflect.Bool:
+			result[key.String()] = rv.Interface()
+		case reflect.Ptr:
+			v, err := parsePtr(rv)
+			if err != nil {
+				errMsg := errors.New(fmt.Sprintf("structToMap fail, key is %s, value is %v, err is %s",
+					key.String(), rv, err))
+				return nil, errMsg
+			}
+			if v == nil {
+				continue
+			}
+			result[key.String()] = v
+		case reflect.Map:
+			v, err := parseMap(rv)
+			if err != nil {
+				return nil, err
+			}
+			result[key.String()] = v
+		case reflect.Slice:
+			v, err := parseSlice(rv)
+			if err != nil {
+				return nil, err
+			}
+			result[key.String()] = v
+		case reflect.Struct:
+			v, err := StructToMap(rv.Interface())
+			if err != nil {
+				return nil, err
+			}
+			result[key.String()] = v
+		default:
+			errMsg := fmt.Sprintf("structToMap fail, unknow value type, type is %s, value is %v\n",
+				rv.Kind(), rv)
+			return nil, errors.New(errMsg)
+		}
+		result[key.String()] = rv.Interface()
 	}
-	return result
+	return result, nil
 }
 
 func parseSlice(v reflect.Value) ([]interface{}, error) {

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"reflect"
 	"testing"
 
 	"chainmaker.org/chainmaker/pb-go/v2/common"
@@ -51,20 +52,14 @@ func TestMutateMap(t *testing.T) {
 	fmt.Println(info)
 }
 
-type A struct {
-	val int
-}
-
-type B struct {
-	a *A
-}
-
-func C(a *A) {
-	return
-}
-
 func TestNilPanic(t *testing.T) {
-
+	block := &common.Block{}
+	bt, err := json.Marshal(nil)
+	if err != nil {
+		return
+	}
+	err = json.Unmarshal(bt, block)
+	return
 }
 
 func TestGossipState(t *testing.T) {
@@ -84,9 +79,57 @@ func TestGossipState(t *testing.T) {
 		VerifingProposal: proposal,
 		RoundVoteSet:     roundVoteSet,
 	}
-	m, _ := StructToMap(*gossipProto)
+	m, err := StructToMap(*gossipProto)
 	fmt.Println(m)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 	new_state := MapToGossipState(m)
-	new_m, _ := StructToMap(*new_state)
+	new_m, err := StructToMap(*new_state)
 	fmt.Println(new_m)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+}
+
+type A struct {
+	Val int
+}
+
+type B struct {
+	A map[string]*A
+}
+
+type C struct {
+	B map[string]*B
+}
+
+func TestMutatePointerMap(t *testing.T) {
+	aa := &A{
+		Val: 1,
+	}
+	bb := &B{
+		A: map[string]*A{
+			"aa": aa,
+		},
+	}
+	cc := &C{
+		B: map[string]*B{
+			"bb": bb,
+		},
+	}
+
+	ident := reflect.ValueOf(*cc).Kind()
+	fmt.Println(ident)
+
+	m, err := StructToMap(*cc)
+	fmt.Println(m)
+	if err != nil {
+		fmt.Println(err)
+	}
+	m, err = MutateMap(m)
+	fmt.Println(m)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
